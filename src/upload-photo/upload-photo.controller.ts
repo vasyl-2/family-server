@@ -6,7 +6,8 @@ import {
   Patch,
   Param,
   Delete,
-  UseInterceptors, UploadedFile,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 
@@ -14,16 +15,42 @@ import { UploadPhotoService } from './upload-photo.service';
 import { CreateUploadPhotoDto } from './dto/create-upload-photo.dto';
 import { UpdateUploadPhotoDto } from './dto/update-upload-photo.dto';
 import { CreateChapterDto } from './dto/create-chapter';
+import { diskStorage } from 'multer';
+import { parse } from 'path';
 
 @Controller('upload-photo')
 export class UploadPhotoController {
   constructor(private readonly uploadPhotoService: UploadPhotoService) {}
 
   @Post('uploadfile')
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(
+    FileInterceptor('photo', {
+      // dest: './files',
+      storage: diskStorage({
+        destination: './files',
+        filename: (req, file, cB) => {
+          const fileName = parse(file.originalname).name.replace(/\s/g, 'mmm');
+          const extension = parse(file.originalname).ext;
+          cB(null, `${fileName}${extension}`);
+
+        }
+      }),
+    }),
+  )
   async uploadFile(@UploadedFile() file: Express.Multer.File) {
+    const { buffer } = file;
 
     console.log('FILE___________', file);
+
+    // const base64Image = new Buffer(file.buffer.toString(), 'binary').toString('base64');
+
+
+    // console.log('BASE_____________________', base64Image);
+    return {
+      // file: file.buffer.toString(),
+      originalName: file.originalname,
+      filename: file.filename,
+    };
   }
 
   @Post('upload')

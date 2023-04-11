@@ -14,9 +14,11 @@ import { UserSchema } from './schemas/user.schem';
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       useFactory: (config: ConfigService) => ({
-        secret: config.get<string>('JWT_SECRET'),
+        secret: 'somesecret',
+        // secret: config.get<string>('JWT_SECRET'),
         signOptions: {
-          expiresIn: config.get<string | number>('JWT_EXPIRE'),
+          // expiresIn: config.get<string | number>('JWT_EXPIRE'),
+          expiresIn: '1h',
         },
       }),
     }),
