@@ -7,16 +7,17 @@ import {
   Param,
   Delete,
   UseInterceptors,
-  UploadedFile,
+  UploadedFile, ParseFilePipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { parse } from 'path';
+import { diskStorage } from 'multer';
 
 import { UploadPhotoService } from './upload-photo.service';
 import { CreateUploadPhotoDto } from './dto/create-upload-photo.dto';
 import { UpdateUploadPhotoDto } from './dto/update-upload-photo.dto';
 import { CreateChapterDto } from './dto/create-chapter';
-import { diskStorage } from 'multer';
-import { parse } from 'path';
+import { PhotoValidatorService } from './photo-validator/photo-validator.service';
 
 @Controller('upload-photo')
 export class UploadPhotoController {
@@ -25,29 +26,31 @@ export class UploadPhotoController {
   @Post('uploadfile')
   @UseInterceptors(
     FileInterceptor('photo', {
-      // dest: './files',
       storage: diskStorage({
         destination: './files',
-        filename: (req, file, cB) => {
+        filename: (req, file: Express.Multer.File, cB) => {
           const fileName = parse(file.originalname).name.replace(/\s/g, 'mmm');
           const extension = parse(file.originalname).ext;
           cB(null, `${fileName}${extension}`);
-
         }
       }),
     }),
   )
-  async uploadFile(@UploadedFile() file: Express.Multer.File) {
-    const { buffer } = file;
-
+  async uploadFile(
+    @Body() body: { [key: string]: string },
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          // PhotoValidatorService
+        ],
+        fileIsRequired: true
+      })
+    ) file: Express.Multer.File
+  ) {
     console.log('FILE___________', file);
+    console.log('BODY________________', body);
 
-    // const base64Image = new Buffer(file.buffer.toString(), 'binary').toString('base64');
-
-
-    // console.log('BASE_____________________', base64Image);
     return {
-      // file: file.buffer.toString(),
       originalName: file.originalname,
       filename: file.filename,
     };
@@ -66,6 +69,8 @@ export class UploadPhotoController {
 
     return result;
   }
+
+
 
   @Post()
   create(@Body() createUploadPhotoDto: CreateUploadPhotoDto) {

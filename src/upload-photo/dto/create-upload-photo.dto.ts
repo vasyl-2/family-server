@@ -1,5 +1,6 @@
 export class CreateUploadPhotoDto {
   title: string;
-  description: string;
+  description?: string;
   chapter?: string;
+  name?: string;
 }

@@ -13,7 +13,7 @@ import { AuthModule } from './auth/auth.module';
   imports: [
     AuthModule,
     UploadPhotoModule,
-    MongooseModule.forRoot('mongodb://localhost:27017/gallery'),
+    MongooseModule.forRoot('mongodb://127.0.0.1:27017/gallery'), // localhost
     AuthModule,
     MulterModule.register({
       dest: './files',
