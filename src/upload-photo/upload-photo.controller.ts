@@ -17,7 +17,6 @@ import { UploadPhotoService } from './upload-photo.service';
 import { CreateUploadPhotoDto } from './dto/create-upload-photo.dto';
 import { UpdateUploadPhotoDto } from './dto/update-upload-photo.dto';
 import { CreateChapterDto } from './dto/create-chapter';
-import { PhotoValidatorService } from './photo-validator/photo-validator.service';
 
 @Controller('upload-photo')
 export class UploadPhotoController {
@@ -37,7 +36,7 @@ export class UploadPhotoController {
     }),
   )
   async uploadFile(
-    @Body() body: { [key: string]: string },
+    @Body() body: CreateUploadPhotoDto,
     @UploadedFile(
       new ParseFilePipe({
         validators: [
@@ -50,10 +49,24 @@ export class UploadPhotoController {
     console.log('FILE___________', file);
     console.log('BODY________________', body);
 
+    try {
+      await this.uploadPhotoService.uploadPhoto(body);
+    } catch (e) {
+      console.log('ERROR_____1', e);
+
+      throw e;
+    }
+
+
     return {
       originalName: file.originalname,
       filename: file.filename,
     };
+  }
+
+  @Get('chapters')
+  async getChapters() {
+    return this.uploadPhotoService.getAllChapters()
   }
 
   @Post('upload')
@@ -70,14 +83,12 @@ export class UploadPhotoController {
     return result;
   }
 
-
-
   @Post()
   create(@Body() createUploadPhotoDto: CreateUploadPhotoDto) {
     return this.uploadPhotoService.create(createUploadPhotoDto);
   }
 
-  @Get()
+  @Get('photos')
   findAll() {
     return this.uploadPhotoService.findAll();
   }

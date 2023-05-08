@@ -19,6 +19,7 @@ export class UploadPhotoService {
   async uploadPhoto(addPhotoDto: CreateUploadPhotoDto) {
     console.log('PHOTO__TO___SAVE____', addPhotoDto);
 
+    // addPhotoDto._id = '3333';
     const galleryE = new this.gallery(addPhotoDto);
     const result = await galleryE.save();
 
@@ -32,12 +33,20 @@ export class UploadPhotoService {
     return result;
   }
 
+  async getAllChapters() {
+    const result = await this.chapter.find().exec();
+
+    console.log('RESULT_____________', result);
+
+    return result;
+  }
+
   create(createUploadPhotoDto: CreateUploadPhotoDto) {
     return 'This action adds a new uploadPhoto';
   }
 
   findAll() {
-    return `This action returns all uploadPhoto`;
+    return JSON.stringify({ test: 'test' });
   }
 
   findOne(id: number) {

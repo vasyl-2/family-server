@@ -7,8 +7,8 @@ export type GalleryDocument = HydratedDocument<Gallery>;
 @Schema({ collection: 'photos' })
 export class Gallery {
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId })
-  _id?: string;
+  // @Prop({ type: mongoose.Schema.Types.ObjectId })
+  // _id?: string;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Chapter' })
   chapter: Chapter;
