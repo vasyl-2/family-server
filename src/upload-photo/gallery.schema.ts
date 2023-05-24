@@ -18,6 +18,9 @@ export class Gallery {
 
   @Prop()
   description: string;
+
+  @Prop()
+  name: string;
 }
 
 export const GallerySchema = SchemaFactory.createForClass(Gallery);

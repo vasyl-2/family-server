@@ -46,14 +46,11 @@ export class UploadPhotoController {
       })
     ) file: Express.Multer.File
   ) {
-    console.log('FILE___________', file);
-    console.log('BODY________________', body);
 
     try {
       await this.uploadPhotoService.uploadPhoto(body);
     } catch (e) {
       console.log('ERROR_____1', e);
-
       throw e;
     }
 
