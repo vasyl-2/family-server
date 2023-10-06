@@ -11,7 +11,6 @@ import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
-    AuthModule,
     UploadPhotoModule,
     MongooseModule.forRoot('mongodb://127.0.0.1:27017/gallery'), // localhost
     AuthModule,

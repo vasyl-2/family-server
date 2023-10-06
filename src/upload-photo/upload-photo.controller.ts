@@ -7,7 +7,7 @@ import {
   Param,
   Delete,
   UseInterceptors,
-  UploadedFile, ParseFilePipe,
+  UploadedFile, ParseFilePipe, UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { parse } from 'path';
@@ -17,6 +17,7 @@ import { UploadPhotoService } from './upload-photo.service';
 import { CreateUploadPhotoDto } from './dto/create-upload-photo.dto';
 import { UpdateUploadPhotoDto } from './dto/update-upload-photo.dto';
 import { CreateChapterDto } from './dto/create-chapter';
+import { AuthGuard } from '../auth/auth.guard';
 
 @Controller('upload-photo')
 export class UploadPhotoController {
@@ -61,6 +62,7 @@ export class UploadPhotoController {
     };
   }
 
+  @UseGuards(AuthGuard)
   @Get('chapters')
   async getChapters() {
     return this.uploadPhotoService.getAllChapters()
