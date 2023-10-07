@@ -2,8 +2,9 @@
 
 declare namespace Express {
   interface Request {
-    customHeader?: {
+    headers:  {
       authorization: string | undefined;
-    }
+    };
+    // authorization: string | undefined;
   }
 }

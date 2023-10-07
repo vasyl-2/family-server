@@ -13,6 +13,7 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
 
+    // console.log('START______________', request)
     if (!token) {
       throw new UnauthorizedException();
     }
@@ -34,7 +35,9 @@ export class AuthGuard implements CanActivate {
     return true;
   }
   private extractTokenFromHeader(request: Request): string | undefined {
-    const [type, token] = request.customHeader?.authorization?.split(' ') ?? [];
+    const [type, space, token] = request.headers.authorization?.split(' ') ?? [];
+   console.log('TYPE_________', type);
+   console.log('TOKEN__________________', token);
     return type === 'Bearer' ? token : undefined;
   }
 
