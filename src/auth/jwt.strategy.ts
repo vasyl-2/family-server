@@ -10,8 +10,8 @@ export class JwtStrategy extends PassportStrategy(Strategy)  {
     private authService: AuthService
   ) {
     super({
-      // jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      jwtFromRequest: ExtractJwt.fromHeader('authorization'),
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      // jwtFromRequest: ExtractJwt.fromHeader('authorization'),
       ignoreExpiration: false,
       secretOrKey: jwtConstants.secret,
       // passReqToCallback: true
