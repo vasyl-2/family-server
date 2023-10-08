@@ -51,7 +51,6 @@ export class UploadPhotoService {
     console.log('RESULT____photos_________', result);
 
     return result;
-    // return JSON.stringify([{ name: 'test', id: '666', _id: '8888', photo: {} }]);
   }
 
   findOne(id: number) {

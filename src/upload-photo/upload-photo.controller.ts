@@ -28,7 +28,11 @@ export class UploadPhotoController {
   @UseInterceptors(
     FileInterceptor('photo', {
       storage: diskStorage({
-        destination: './files',
+        // destination: './files',
+        // destination: process.env.FILE_PATH,
+        destination: function (req, file, cb) {
+          cb(null, process.env.FILE_PATH)
+        },
         filename: (req, file: Express.Multer.File, cB) => {
           const fileName = parse(file.originalname).name.replace(/\s/g, 'mmm');
           const extension = parse(file.originalname).ext;
@@ -50,6 +54,7 @@ export class UploadPhotoController {
   ) {
 
     try {
+      console.log('PATH__________________________', process.env.NODE_ENV)
       await this.uploadPhotoService.uploadPhoto(body);
     } catch (e) {
       console.log('ERROR_____1', e);
@@ -89,6 +94,7 @@ export class UploadPhotoController {
     return this.uploadPhotoService.create(createUploadPhotoDto);
   }
 
+  @UseGuards(AuthPassportGuard)
   @Get('photos')
   findAll() {
     return this.uploadPhotoService.findAll();

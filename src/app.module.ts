@@ -7,16 +7,26 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UploadPhotoModule } from './upload-photo/upload-photo.module';
 import { AuthModule } from './auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
 
 
 @Module({
   imports: [
     UploadPhotoModule,
+    ConfigModule.forRoot({
+      envFilePath: '.env',
+    }),
     MongooseModule.forRoot('mongodb://127.0.0.1:27017/gallery'), // localhost
     AuthModule,
     MulterModule.register({
-      dest: './files',
+      // dest: './files',
+      dest: process.env.FILE_PATH,
     }),
+    // MulterModule.registerAsync({
+    //   useFactory: () => ({
+    //     dest: './upload',
+    //   }),
+    // }),
     DevtoolsModule.register({
       http: process.env.NODE_ENV !== 'production',
     }),
