@@ -18,6 +18,7 @@ import { CreateUploadPhotoDto } from './dto/create-upload-photo.dto';
 import { UpdateUploadPhotoDto } from './dto/update-upload-photo.dto';
 import { CreateChapterDto } from './dto/create-chapter';
 import { AuthGuard } from '../auth/auth.guard';
+import { AuthPassportGuard } from '../auth/auth-passport.guard';
 
 @Controller('upload-photo')
 export class UploadPhotoController {
@@ -62,7 +63,8 @@ export class UploadPhotoController {
     };
   }
 
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
+  @UseGuards(AuthPassportGuard)
   @Get('chapters')
   async getChapters() {
     return this.uploadPhotoService.getAllChapters()

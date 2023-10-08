@@ -8,6 +8,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { UserSchema } from './schemas/user.schem';
 import { jwtConstants } from './constant';
+import { JwtStrategy } from './jwt.strategy';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { jwtConstants } from './constant';
   controllers: [AuthController],
   providers: [
     AuthService,
+    JwtStrategy,
     // {
     //   provide: APP_GUARD,
     //   useClass: AuthGuard,

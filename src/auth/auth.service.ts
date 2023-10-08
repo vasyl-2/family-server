@@ -9,7 +9,7 @@ export class AuthService {
 
   constructor(
     @InjectModel('Auth') private readonly auth: Model<UserDocument>,
-    private jwtService: JwtService
+    private jwtService: JwtService,
   ) {
   }
 
@@ -34,11 +34,22 @@ export class AuthService {
       throw new UnauthorizedException();
     }
 
-    const { password, ...result } = resp;
-
     const payload = { sub: resp._id, username: resp.name };
     return {
       access_token: await this.jwtService.signAsync(payload),
     };
+  }
+
+  async validateUser(id :string): Promise<{ }> {
+    const i = id;
+    const resp = await this.auth.findById(id).exec();
+
+    if (!resp) {
+      throw new UnauthorizedException();
+    }
+
+    const { password, ...rest } = resp;
+
+    return rest;
   }
 }

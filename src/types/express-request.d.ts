@@ -3,8 +3,9 @@
 declare namespace Express {
   interface Request {
     headers:  {
-      authorization: string | undefined;
+      Authorization: string | undefined;
+      BBB: string | undefined;
     };
-    // authorization: string | undefined;
+    BBB: string | undefined;
   }
 }
