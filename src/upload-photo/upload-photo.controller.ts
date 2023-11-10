@@ -28,13 +28,18 @@ export class UploadPhotoController {
   @UseInterceptors(
     FileInterceptor('photo', {
       storage: diskStorage({
-        // destination: './files',
-        // destination: process.env.FILE_PATH,
         destination: function (req, file, cb) {
-          cb(null, process.env.FILE_PATH)
+          if (req.headers.chaptername) {
+            cb(null, `${process.env.FILE_PATH}/${req.headers.chaptername}`);
+          } else {
+            cb(null, process.env.FILE_PATH);
+          }
         },
         filename: (req, file: Express.Multer.File, cB) => {
-          const fileName = parse(file.originalname).name.replace(/\s/g, 'mmm');
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+          let fileName = parse(file.originalname).name.replace(/\s/g, 'mmm');
+          fileName = `${fileName}-${uniqueSuffix}`;
+
           const extension = parse(file.originalname).ext;
           cB(null, `${fileName}${extension}`);
         }
