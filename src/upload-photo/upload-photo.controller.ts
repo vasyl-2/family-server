@@ -30,6 +30,7 @@ export class UploadPhotoController {
       storage: diskStorage({
         destination: function (req, file, cb) {
           if (req.headers.chaptername) {
+            console.log('CHAPTER_NAME______________________________________', req.headers.chaptername)
             cb(null, `${process.env.FILE_PATH}/${req.headers.chaptername}`);
           } else {
             cb(null, process.env.FILE_PATH);
@@ -59,7 +60,6 @@ export class UploadPhotoController {
   ) {
 
     try {
-      console.log('PATH__________________________', process.env.NODE_ENV)
       await this.uploadPhotoService.uploadPhoto(body);
     } catch (e) {
       console.log('ERROR_____1', e);
@@ -87,7 +87,7 @@ export class UploadPhotoController {
     return result;
   }
 
-  @Post('createChapter')
+  @Post('createchapter')
   async createChapter(@Body() chapter: CreateChapterDto) {
     const result = await this.uploadPhotoService.createChapter(chapter);
 

@@ -7,6 +7,7 @@ import { UpdateUploadPhotoDto } from './dto/update-upload-photo.dto';
 import { Gallery, GalleryDocument } from './gallery.schema';
 import { CreateChapterDto } from './dto/create-chapter';
 import { ChapterDocument } from './chapter-schema';
+import * as fs from 'fs';
 
 @Injectable()
 export class UploadPhotoService {
@@ -27,16 +28,42 @@ export class UploadPhotoService {
 
   async createChapter(createChapter: CreateChapterDto) {
     const galleryE = new this.chapter(createChapter);
-    const result = await galleryE.save();
+    let newChapter;
 
-    return result;
+    console.log('PWD______________', process.cwd());
+
+    try {
+      newChapter = await galleryE.save();
+    } catch (e) {
+      console.error('Unable create chapter!');
+    }
+
+    if (newChapter) {
+      const { title } = newChapter;
+      try {
+        if (newChapter.parent) {
+          const { parentTitle } = newChapter;
+          if (!fs.existsSync(`${process.cwd()}/files/${parentTitle}/${title}`)){
+            fs.mkdirSync(`${process.cwd()}/files/${parentTitle}/${title}`);
+          }
+        } else {
+          if (!fs.existsSync(`${title}`)){
+            fs.mkdirSync(`${process.cwd()}/files/${title}`);
+          }
+        }
+      } catch (e) {
+        console.error('ERROR__________________________', e);
+      }
+    }
+
+    const allChapters = await this.getAllChapters();
+
+
+    return allChapters;
   }
 
   async getAllChapters() {
     const result = await this.chapter.find().exec();
-
-    console.log('RESULT_____________', result);
-
     return result;
   }
 
@@ -47,9 +74,6 @@ export class UploadPhotoService {
   async findAll() {
 
     const result = await this.gallery.find().exec();
-
-    console.log('RESULT____photos_________', result);
-
     return result;
   }
 
