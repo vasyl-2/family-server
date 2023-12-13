@@ -7,11 +7,13 @@ import {
   Param,
   Delete,
   UseInterceptors,
-  UploadedFile, ParseFilePipe, UseGuards,
+  UploadedFile, ParseFilePipe, UseGuards, Res, StreamableFile, Header,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { parse } from 'path';
 import { diskStorage } from 'multer';
+import { join } from 'path';
+import type { Response } from 'express';
 
 import { UploadPhotoService } from './upload-photo.service';
 import { CreateUploadPhotoDto } from './dto/create-upload-photo.dto';
@@ -19,6 +21,8 @@ import { UpdateUploadPhotoDto } from './dto/update-upload-photo.dto';
 import { CreateChapterDto } from './dto/create-chapter';
 import { AuthGuard } from '../auth/auth.guard';
 import { AuthPassportGuard } from '../auth/auth-passport.guard';
+import { createReadStream, readFileSync } from 'fs';
+import { Gallery } from './gallery.schema';
 
 @Controller('upload-photo')
 export class UploadPhotoController {
@@ -100,9 +104,26 @@ export class UploadPhotoController {
   }
 
   @UseGuards(AuthPassportGuard)
-  @Get('photos')
-  findAll() {
-    return this.uploadPhotoService.findAll();
+  @Get('photos/:chapter')
+  @Header('Content-Type', 'image/png')
+  // async findAll(@Param('chapter') chapter: string): Promise<Gallery[]> {
+  async findAll(@Param('chapter') chapter: string) {
+    // const photos = await this.uploadPhotoService.findAll(chapter);
+    const photos = await this.uploadPhotoService.findPhotosFiles(chapter);
+
+    console.log('CHAPTER_____________________________________', photos[0]);
+
+    const file = createReadStream(join(process.cwd(), 'files/father/test-1700314306421-295207653.png'));
+    return new StreamableFile(file);
+    // return photos[0];
+  }
+
+  @UseGuards(AuthPassportGuard)
+  @Get('photoslist/:chapter')
+  async findAllPhotos(@Param('chapter') chapter: string) {
+    const photos = await this.uploadPhotoService.findAll(chapter);
+    console.log('LIST___PHOTOS______________', photos)
+    return photos;
   }
 
   @Get(':id')

@@ -6,7 +6,7 @@ import { CreateUploadPhotoDto } from './dto/create-upload-photo.dto';
 import { UpdateUploadPhotoDto } from './dto/update-upload-photo.dto';
 import { Gallery, GalleryDocument } from './gallery.schema';
 import { CreateChapterDto } from './dto/create-chapter';
-import { ChapterDocument } from './chapter-schema';
+import { Chapter, ChapterDocument } from './chapter-schema';
 import * as fs from 'fs';
 
 @Injectable()
@@ -29,9 +29,6 @@ export class UploadPhotoService {
   async createChapter(createChapter: CreateChapterDto) {
     const galleryE = new this.chapter(createChapter);
     let newChapter;
-
-    console.log('PWD______________', process.cwd());
-
     try {
       newChapter = await galleryE.save();
     } catch (e) {
@@ -42,9 +39,9 @@ export class UploadPhotoService {
       const { title } = newChapter;
       try {
         if (newChapter.parent) {
-          const { parentTitle } = newChapter;
-          if (!fs.existsSync(`${process.cwd()}/files/${parentTitle}/${title}`)){
-            fs.mkdirSync(`${process.cwd()}/files/${parentTitle}/${title}`);
+          const { fullPath } = newChapter;
+          if (!fs.existsSync(`${process.cwd()}/files/${fullPath}`)){
+            fs.mkdirSync(`${process.cwd()}/files/${fullPath}`);
           }
         } else {
           if (!fs.existsSync(`${title}`)){
@@ -71,11 +68,46 @@ export class UploadPhotoService {
     return 'This action adds a new uploadPhoto';
   }
 
-  async findAll() {
+  async findAll(chapter: string): Promise<Gallery[]> {
+    let result;
+    let currentChapter;
 
-    const result = await this.gallery.find().exec();
+    console.log('CHAPTER______', chapter)
+
+    try {
+      result = await this.gallery.find({ chapter }).exec();
+    } catch (e) {
+      console.error('ERROR____', e);
+    }
+
+    try {
+      currentChapter = await this.chapter.find({ _id: chapter }).exec();
+    } catch (e) {
+      console.error('ERROR__________', e)
+    }
+
+    // if (currentChapter) {
+    //   result = result.map((p) => {
+    //     return p._doc;
+    //   });
+    // }
+
+    return result.map((p: Gallery) => {
+      let fullPath;
+
+      return {
+        ...p,
+        fullPath: 'api/father/test-1700314306421-295207653.png'
+      }
+    });
+  }
+
+  async findPhotosFiles(chapter) {
+    const result = await this.gallery.find({ chapter }).exec();
+
     return result;
   }
+
 
   findOne(id: number) {
     return `This action returns a #${id} uploadPhoto`;

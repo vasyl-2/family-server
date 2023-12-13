@@ -14,13 +14,16 @@ export class Gallery {
   chapter: Chapter;
 
   @Prop()
-  title: string;
+  title?: string;
 
   @Prop()
   description: string;
 
   @Prop()
   name: string;
+
+  @Prop()
+  fullPath?: string;
 }
 
 export const GallerySchema = SchemaFactory.createForClass(Gallery);

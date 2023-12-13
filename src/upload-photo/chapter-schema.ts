@@ -24,6 +24,9 @@ export class Chapter {
   @Prop()
   parentTitle?: string;
 
+  @Prop()
+  fullPath?: string;
+
 }
 
 export const ChapterSchema = SchemaFactory.createForClass(Chapter);
