@@ -17,7 +17,8 @@ export class UploadPhotoService {
     @InjectModel('Chapter') private readonly chapter: Model<ChapterDocument>,
   ) {}
 
-  async uploadPhoto(addPhotoDto: CreateUploadPhotoDto) {
+  async uploadPhoto(addPhotoDto: CreateUploadPhotoDto, fileName: string) {
+    addPhotoDto.name = fileName;
     console.log('PHOTO__TO___SAVE____', addPhotoDto);
 
     const galleryE = new this.gallery(addPhotoDto);
@@ -70,9 +71,6 @@ export class UploadPhotoService {
 
   async findAll(chapter: string): Promise<Gallery[]> {
     let result;
-    let currentChapter;
-
-    console.log('CHAPTER______', chapter)
 
     try {
       result = await this.gallery.find({ chapter }).exec();
@@ -80,25 +78,8 @@ export class UploadPhotoService {
       console.error('ERROR____', e);
     }
 
-    try {
-      currentChapter = await this.chapter.find({ _id: chapter }).exec();
-    } catch (e) {
-      console.error('ERROR__________', e)
-    }
-
-    // if (currentChapter) {
-    //   result = result.map((p) => {
-    //     return p._doc;
-    //   });
-    // }
-
-    return result.map((p: Gallery) => {
-      let fullPath;
-
-      return {
-        ...p,
-        fullPath: 'api/father/test-1700314306421-295207653.png'
-      }
+    return result.map((p) => {
+      return p._doc;
     });
   }
 

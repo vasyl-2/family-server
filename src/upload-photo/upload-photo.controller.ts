@@ -41,11 +41,13 @@ export class UploadPhotoController {
           }
         },
         filename: (req, file: Express.Multer.File, cB) => {
+          const _this = this;
           const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
           let fileName = parse(file.originalname).name.replace(/\s/g, 'mmm');
           fileName = `${fileName}-${uniqueSuffix}`;
 
           const extension = parse(file.originalname).ext;
+
           cB(null, `${fileName}${extension}`);
         }
       }),
@@ -63,8 +65,10 @@ export class UploadPhotoController {
     ) file: Express.Multer.File
   ) {
 
+    console.log('FILE________******', file);
+    const { filename } = file;
     try {
-      await this.uploadPhotoService.uploadPhoto(body);
+      await this.uploadPhotoService.uploadPhoto(body, filename);
     } catch (e) {
       console.log('ERROR_____1', e);
       throw e;
@@ -84,12 +88,12 @@ export class UploadPhotoController {
     return this.uploadPhotoService.getAllChapters()
   }
 
-  @Post('upload')
-  async uploadPhoto(@Body() photo: CreateUploadPhotoDto) {
-    const result = await this.uploadPhotoService.uploadPhoto(photo);
-
-    return result;
-  }
+  // @Post('upload')
+  // async uploadPhoto(@Body() photo: CreateUploadPhotoDto) {
+  //   const result = await this.uploadPhotoService.uploadPhoto(photo);
+  //
+  //   return result;
+  // }
 
   @Post('createchapter')
   async createChapter(@Body() chapter: CreateChapterDto) {
