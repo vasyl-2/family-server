@@ -3,13 +3,10 @@ import mongoose, { HydratedDocument } from 'mongoose';
 
 import { Chapter } from './chapter-schema';
 
-export type GalleryDocument = HydratedDocument<Gallery>;
+export type VideoDocument = HydratedDocument<Video>;
 
-@Schema({ collection: 'photos' })
-export class Gallery {
-
-  // @Prop({ type: mongoose.Schema.Types.ObjectId })
-  // _id?: string;
+@Schema({ collection: 'videos' })
+export class Video {
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Chapter' })
   chapter: Chapter;
@@ -25,7 +22,7 @@ export class Gallery {
 
   @Prop()
   fullPath?: string;
+
 }
 
-export const GallerySchema = SchemaFactory.createForClass(Gallery);
-
+export const VideoSchema = SchemaFactory.createForClass(Video);

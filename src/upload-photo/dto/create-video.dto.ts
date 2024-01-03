@@ -1,4 +1,4 @@
-export class CreateUploadPhotoDto {
+export class CreateVideoDto {
   _id?: string;
   title: string;
   description?: string;

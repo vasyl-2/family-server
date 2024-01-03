@@ -1,13 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import * as fs from 'fs';
 
 import { CreateUploadPhotoDto } from './dto/create-upload-photo.dto';
 import { UpdateUploadPhotoDto } from './dto/update-upload-photo.dto';
 import { Gallery, GalleryDocument } from './gallery.schema';
 import { CreateChapterDto } from './dto/create-chapter';
 import { Chapter, ChapterDocument } from './chapter-schema';
-import * as fs from 'fs';
+import { CreateVideoDto } from './dto/create-video.dto';
+import { VideoDocument } from './video-schema';
+
 
 @Injectable()
 export class UploadPhotoService {
@@ -15,6 +18,7 @@ export class UploadPhotoService {
   constructor(
     @InjectModel('Gallery') private readonly gallery: Model<GalleryDocument>,
     @InjectModel('Chapter') private readonly chapter: Model<ChapterDocument>,
+    @InjectModel('Video') private readonly video: Model<VideoDocument>,
   ) {}
 
   async uploadPhoto(addPhotoDto: CreateUploadPhotoDto, fileName: string) {
@@ -23,6 +27,16 @@ export class UploadPhotoService {
 
     const galleryE = new this.gallery(addPhotoDto);
     const result = await galleryE.save();
+
+    return result;
+  }
+
+  async uploadVideo(addVideoDto: CreateVideoDto, fileName: string) {
+    addVideoDto.name = fileName;
+    console.log('VIDEO__TO___SAVE____', addVideoDto);
+
+    const vid = new this.video(addVideoDto);
+    const result = await vid.save();
 
     return result;
   }

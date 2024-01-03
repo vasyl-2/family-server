@@ -1,3 +1,9 @@
 export class CreateChapterDto {
-  constructor(private title: string, private parent?: string) {}
+ title: string;
+ readable_id: string;
+ mameForUI: string;
+ fullPath: string;
+ _id?: string;
+ id?: string;
+ parent?: string;
 }

@@ -23,6 +23,7 @@ import { AuthGuard } from '../auth/auth.guard';
 import { AuthPassportGuard } from '../auth/auth-passport.guard';
 import { createReadStream, readFileSync } from 'fs';
 import { Gallery } from './gallery.schema';
+import { CreateVideoDto } from './dto/create-video.dto';
 
 @Controller('upload-photo')
 export class UploadPhotoController {
@@ -69,6 +70,57 @@ export class UploadPhotoController {
     const { filename } = file;
     try {
       await this.uploadPhotoService.uploadPhoto(body, filename);
+    } catch (e) {
+      console.log('ERROR_____1', e);
+      throw e;
+    }
+
+
+    return {
+      originalName: file.originalname,
+      filename: file.filename,
+    };
+  }
+
+  @Post('uploadvideo')
+  @UseInterceptors(
+    FileInterceptor('photo', {
+      storage: diskStorage({
+        destination: function (req, file, cb) {
+          if (req.headers.chaptername) {
+            console.log('CHAPTER_NAME______________________________________', req.headers.chaptername)
+            cb(null, `${process.env.FILE_PATH}/videos/${req.headers.chaptername}`);
+          } else {
+            cb(null, `${process.env.FILE_PATH}/videos`);
+          }
+        },
+        filename: (req, file: Express.Multer.File, cB) => {
+          const _this = this;
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+          let fileName = parse(file.originalname).name.replace(/\s/g, 'mmm');
+          fileName = `${fileName}-${uniqueSuffix}`;
+
+          const extension = parse(file.originalname).ext;
+
+          cB(null, `${fileName}${extension}`);
+        }
+      })
+    })
+  )
+  async uploadVideo(
+    @Body() body: CreateVideoDto,
+    @UploadedFile(
+      new ParseFilePipe({
+        fileIsRequired: true
+      })
+    ) file: Express.Multer.File
+  ) {
+
+
+    console.log('FILE________******', file);
+    const { filename } = file;
+    try {
+      await this.uploadPhotoService.uploadVideo(body, filename);
     } catch (e) {
       console.log('ERROR_____1', e);
       throw e;
