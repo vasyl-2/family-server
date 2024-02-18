@@ -7,7 +7,7 @@ import {
   Param,
   Delete,
   UseInterceptors,
-  UploadedFile, ParseFilePipe, UseGuards, Res, StreamableFile, Header,
+  UploadedFile, ParseFilePipe, UseGuards, Res, StreamableFile, Header, Put,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { parse } from 'path';
@@ -196,4 +196,10 @@ export class UploadPhotoController {
   remove(@Param('id') id: string) {
     return this.uploadPhotoService.remove(+id);
   }
+
+  @Patch('updatephoto/:id')
+  updatePhoto(@Param('id') id: string, @Body() body: { photo: any }) {
+    return this.uploadPhotoService.updatePhoto(body.photo);
+  }
+
 }

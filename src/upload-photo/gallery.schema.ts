@@ -12,7 +12,8 @@ export class Gallery {
   // _id?: string;
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Chapter' })
-  chapter: Chapter;
+  // chapter: Chapter;
+  chapter: { type: mongoose.Schema.Types.ObjectId, ref: 'Chapter' };
 
   @Prop()
   title?: string;

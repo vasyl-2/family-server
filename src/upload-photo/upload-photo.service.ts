@@ -31,6 +31,22 @@ export class UploadPhotoService {
     return result;
   }
 
+  async updatePhoto(updatedDto: CreateUploadPhotoDto) {
+
+    console.log('PHOTO__TO___SAVE____', updatedDto);
+
+    let result;
+    // result = await this.gallery.updateOne({ _id: updatedDto._id }, updatedDto).exec();
+    try {
+      result = await this.gallery.updateOne({ _id: updatedDto._id }, updatedDto).exec();
+      console.log('RESULT___UPDATE______', result);
+    } catch (e) {
+      console.log('ERROR___WHILE___UPDATE______', JSON.stringify(e));
+    }
+
+    return updatedDto;
+  }
+
   async uploadVideo(addVideoDto: CreateVideoDto, fileName: string) {
     addVideoDto.name = fileName;
     console.log('VIDEO__TO___SAVE____', addVideoDto);
