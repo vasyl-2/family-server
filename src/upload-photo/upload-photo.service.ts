@@ -2,6 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as fs from 'fs';
+import * as fsProm from 'fs/promises';
+
+import * as path from 'path';
 
 import { CreateUploadPhotoDto } from './dto/create-upload-photo.dto';
 import { UpdateUploadPhotoDto } from './dto/update-upload-photo.dto';
@@ -33,13 +36,20 @@ export class UploadPhotoService {
 
   async updatePhoto(updatedDto: CreateUploadPhotoDto) {
 
+    const photo = await this.gallery.findById(updatedDto._id);
+    if (!photo) {
+      console.log('NO___PHOTO_____________');
+      throw new Error('Photo not found_________');
+    }
     console.log('PHOTO__TO___SAVE____', updatedDto);
 
     let result;
-    // result = await this.gallery.updateOne({ _id: updatedDto._id }, updatedDto).exec();
     try {
+      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      await fsProm.rename(`files/${photo.fullPath}/${photo.name}`, `files/${updatedDto.fullPath}/${updatedDto.name}-${uniqueSuffix}`);
       result = await this.gallery.updateOne({ _id: updatedDto._id }, updatedDto).exec();
-      console.log('RESULT___UPDATE______', result);
+      console.log('RESULT___RENAMED_______________', result);
+
     } catch (e) {
       console.log('ERROR___WHILE___UPDATE______', JSON.stringify(e));
     }
@@ -104,6 +114,7 @@ export class UploadPhotoService {
 
     try {
       result = await this.gallery.find({ chapter }).exec();
+      console.log('ALL___RESULTTSS________', result)
     } catch (e) {
       console.error('ERROR____', e);
     }

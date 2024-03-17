@@ -199,6 +199,8 @@ export class UploadPhotoController {
 
   @Patch('updatephoto/:id')
   updatePhoto(@Param('id') id: string, @Body() body: { photo: any }) {
+    console.log('ID___TO__RENAME__________', id);
+    console.log('BODY____TO___RENAME_____', body);
     return this.uploadPhotoService.updatePhoto(body.photo);
   }
 
