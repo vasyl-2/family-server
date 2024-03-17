@@ -37,6 +37,7 @@ export class UploadPhotoService {
   async updatePhoto(updatedDto: CreateUploadPhotoDto) {
 
     const photo = await this.gallery.findById(updatedDto._id);
+    console.log('PHOTO_____________', photo);
     if (!photo) {
       console.log('NO___PHOTO_____________');
       throw new Error('Photo not found_________');
@@ -46,7 +47,12 @@ export class UploadPhotoService {
     let result;
     try {
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      updatedDto.name = `${updatedDto.name}-${uniqueSuffix}`
+      const extension = updatedDto.name.split('.').pop();
+      let nameWithoutExtension = this.removeExtension(updatedDto.name);
+
+      updatedDto.name = `${nameWithoutExtension}-${uniqueSuffix}.${extension}`;
+
+
       await fsProm.rename(`files/${photo.fullPath}/${photo.name}`, `files/${updatedDto.fullPath}/${updatedDto.name}`);
 
 
@@ -58,6 +64,17 @@ export class UploadPhotoService {
     }
 
     return updatedDto;
+  }
+
+  private removeExtension(imageString) {
+    const lastDotIndex = imageString.lastIndexOf('.');
+    if (lastDotIndex === -1) {
+      // If there's no dot in the string, return the original string
+      return imageString;
+    } else {
+      // Return the substring from the start of the string to the last dot
+      return imageString.substring(0, lastDotIndex);
+    }
   }
 
   async uploadVideo(addVideoDto: CreateVideoDto, fileName: string) {
