@@ -46,7 +46,10 @@ export class UploadPhotoService {
     let result;
     try {
       const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      await fsProm.rename(`files/${photo.fullPath}/${photo.name}`, `files/${updatedDto.fullPath}/${updatedDto.name}-${uniqueSuffix}`);
+      updatedDto.name = `${updatedDto.name}-${uniqueSuffix}`
+      await fsProm.rename(`files/${photo.fullPath}/${photo.name}`, `files/${updatedDto.fullPath}/${updatedDto.name}`);
+
+
       result = await this.gallery.updateOne({ _id: updatedDto._id }, updatedDto).exec();
       console.log('RESULT___RENAMED_______________', result);
 
