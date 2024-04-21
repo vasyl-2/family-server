@@ -13,7 +13,7 @@ export class Chapter {
   title: string;
 
   @Prop()
-  nameForUI?: string;
+  nameForUI: string;
 
   @Prop()
   description?: string;

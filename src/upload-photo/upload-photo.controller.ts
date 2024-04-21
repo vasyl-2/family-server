@@ -134,9 +134,10 @@ export class UploadPhotoController {
   }
 
   // @UseGuards(AuthGuard)
-  @UseGuards(AuthPassportGuard)
+  // @UseGuards(AuthPassportGuard)
   @Get('chapters')
   async getChapters() {
+    console.log('REQ________!!!')
     return this.uploadPhotoService.getAllChapters()
   }
 
@@ -149,8 +150,8 @@ export class UploadPhotoController {
 
   @Post('createchapter')
   async createChapter(@Body() chapter: CreateChapterDto) {
-    const result = await this.uploadPhotoService.createChapter(chapter);
-
+    const resultCreated = await this.uploadPhotoService.createChapter(chapter);
+    const result = await this.uploadPhotoService.getAllChapters();
     return result;
   }
 
