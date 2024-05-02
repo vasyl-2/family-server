@@ -42,9 +42,9 @@ export class UploadPhotoController {
           }
         },
         filename: (req, file: Express.Multer.File, cB) => {
-          const _this = this;
           const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
           let fileName = parse(file.originalname).name.replace(/\s/g, 'mmm');
+          fileName = Buffer.from(fileName, 'latin1').toString('utf8');
           fileName = `${fileName}-${uniqueSuffix}`;
 
           const extension = parse(file.originalname).ext;
@@ -68,6 +68,7 @@ export class UploadPhotoController {
 
     console.log('FILE________******', file);
     const { filename } = file;
+    console.log('FILENAME_______', filename)
     try {
       await this.uploadPhotoService.uploadPhoto(body, filename);
     } catch (e) {

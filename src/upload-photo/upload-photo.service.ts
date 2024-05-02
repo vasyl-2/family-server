@@ -35,8 +35,6 @@ export class UploadPhotoService implements OnModuleInit {
 
       const parentToId = new Map<string, string>();
 
-      const chapterToImages = new Map<string, string[]>();
-
       let upperLevel = folder.replace(/\\/g, '/').replace(/^files\//, '');
       let parent: string;
 
@@ -182,10 +180,13 @@ export class UploadPhotoService implements OnModuleInit {
           } else {
             fullPath = pathToFileOrFolder;
           }
+          let photoName = pathToFileOrFolder.replace(/^.*\//, '');
+          console.log('BEFORE____', photoName)
+          // photoName = Buffer.from(photoName, 'latin1').toString('utf8');
           const createPhotoDTO: CreateUploadPhotoDto = {
             fullPath,
             title: pathToFileOrFolder.replace(/^.*\//, ''),
-            name: pathToFileOrFolder.replace(/^.*\//, ''),
+            name: photoName,
             chapter: chapterId
 
           }
@@ -326,7 +327,7 @@ export class UploadPhotoService implements OnModuleInit {
       console.error('CHAPTERS___ERROR_RR____', JSON.stringify(e));
     }
 
-    console.log('CHAPTERS__SUCCESS________', result);
+    // console.log('CHAPTERS__SUCCESS________', result);
 
 
     return result;
