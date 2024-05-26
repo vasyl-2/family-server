@@ -184,6 +184,14 @@ export class UploadPhotoController {
     return photos;
   }
 
+  @UseGuards(AuthPassportGuard)
+  @Get('videolist/:chapter')
+  async findAllVideos(@Param('chapter') chapter: string) {
+    const videos = await this.uploadPhotoService.findAllVideos(chapter);
+    console.log('LIST___VIDEOS______________', videos);
+    return videos;
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.uploadPhotoService.findOne(+id);

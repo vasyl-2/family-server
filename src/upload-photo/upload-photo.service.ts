@@ -15,6 +15,7 @@ import { CreateChapterDto } from './dto/create-chapter';
 import { Chapter, ChapterDocument } from './chapter-schema';
 import { CreateVideoDto } from './dto/create-video.dto';
 import { VideoDocument } from './video-schema';
+import { Video } from './video-schema';
 
 @Injectable()
 export class UploadPhotoService implements OnModuleInit {
@@ -356,6 +357,21 @@ export class UploadPhotoService implements OnModuleInit {
 
     try {
       result = await this.gallery.find({ chapter }).exec();
+      console.log('ALL___RESULTTSS________', result)
+    } catch (e) {
+      console.error('ERROR____', e);
+    }
+
+    return result.map((p) => {
+      return p._doc;
+    });
+  }
+
+  async findAllVideos(chapter: string): Promise<Video[]> {
+    let result;
+
+    try {
+      result = await this.video.find({ chapter }).exec();
       console.log('ALL___RESULTTSS________', result)
     } catch (e) {
       console.error('ERROR____', e);
