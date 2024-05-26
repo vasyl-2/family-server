@@ -90,9 +90,9 @@ export class UploadPhotoController {
         destination: function (req, file, cb) {
           if (req.headers.chaptername) {
             console.log('CHAPTER_NAME______________________________________', req.headers.chaptername)
-            cb(null, `${process.env.FILE_PATH}/videos/${req.headers.chaptername}`);
+            cb(null, `${process.env.VIDEOS_PATH}/${req.headers.chaptername}`);
           } else {
-            cb(null, `${process.env.FILE_PATH}/videos`);
+            cb(null, `${process.env.VIDEOS_PATH}`);
           }
         },
         filename: (req, file: Express.Multer.File, cB) => {
@@ -135,11 +135,18 @@ export class UploadPhotoController {
   }
 
   // @UseGuards(AuthGuard)
-  // @UseGuards(AuthPassportGuard)
+  @UseGuards(AuthPassportGuard)
   @Get('chapters')
   async getChapters() {
     console.log('REQ________!!!')
     return this.uploadPhotoService.getAllChapters()
+  }
+
+  // @UseGuards(AuthGuard)
+  @UseGuards(AuthPassportGuard)
+  @Get('video-chapters')
+  async getVideoChapters() {
+    return this.uploadPhotoService.getAllVideoChapters()
   }
 
   // @Post('upload')
@@ -155,6 +162,15 @@ export class UploadPhotoController {
     const result = await this.uploadPhotoService.getAllChapters();
     return result;
   }
+
+  @Post('createvideochapter')
+  async createVideoChapter(@Body() chapter: CreateChapterDto) {
+    const resultCreated = await this.uploadPhotoService.createVideoChapter(chapter);
+    const result = await this.uploadPhotoService.getAllVideoChapters();
+    return result;
+  }
+
+  //
 
   @Post()
   create(@Body() createUploadPhotoDto: CreateUploadPhotoDto) {

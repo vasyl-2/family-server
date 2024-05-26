@@ -1,10 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 
-export type ChapterDocument = HydratedDocument<Chapter>;
+export type VideoChapterDocument = HydratedDocument<VideoChapter>;
 
-@Schema({ collection: 'chapters' })
-export class Chapter {
+@Schema({ collection: 'video-chapters' })
+export class VideoChapter {
 
   // @Prop({ type: mongoose.Schema.Types.ObjectId })
   // _id?: string;
@@ -29,4 +29,4 @@ export class Chapter {
 
 }
 
-export const ChapterSchema = SchemaFactory.createForClass(Chapter);
+export const VideoChapterSchema = SchemaFactory.createForClass(VideoChapter);

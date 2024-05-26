@@ -20,17 +20,23 @@ import { AuthModule } from './auth/auth.module';
     }),
     MongooseModule.forRoot('mongodb://127.0.0.1:27017/gallery'), // localhost
     AuthModule,
-    MulterModule.register({
-      // dest: './files',
-      dest: process.env.FILE_PATH,
-    }),
+    // MulterModule.register({
+    //   dest: process.env.FILE_PATH,
+    // }),
     // MulterModule.registerAsync({
     //   useFactory: () => ({
     //     dest: './upload',
     //   }),
     // }),
+
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'videos'),
+      renderPath: `/videos`,
+      exclude: ['/api/(.*)'],
+    }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'files'),
+      renderPath: `/files`,
       exclude: ['/api/(.*)'],
     }),
     DevtoolsModule.register({
