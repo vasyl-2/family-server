@@ -5,18 +5,25 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { AuthService } from './auth.service';
 import { jwtConstants } from './constant';
 
+import { JwtPayload } from 'jsonwebtoken';
+
+export interface CustomJwtPayload extends JwtPayload {
+  email: string;
+}
+
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy)  {
   constructor(private authService: AuthService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      ignoreExpiration: false,
+      // ignoreExpiration: false,
       secretOrKey: jwtConstants.secret,
-      // passReqToCallback: true
+      // passReqToCallback: true // for refresh token
     });
   }
 
-  async validate(payload): Promise<any> {
+  async validate(payload: CustomJwtPayload): Promise<any> {
+    console.log('PAYLOAD_________________________', payload)
     const { sub } = payload;
     const user = await this.authService.validateUser(sub);
 
