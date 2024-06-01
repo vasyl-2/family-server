@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { UserDocument } from './schemas/user.schem';
 import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
+import { CustomJwtPayload } from './jwt.strategy';
 
 @Injectable()
 export class AuthService {
@@ -34,10 +35,18 @@ export class AuthService {
       throw new UnauthorizedException();
     }
 
-    const payload = { sub: resp._id, username: resp.name };
-    return {
-      access_token: await this.jwtService.signAsync(payload),
-    };
+    console.log('RESPPPPP_________________', resp)
+
+    const payload = { sub: resp._id, email: resp.email };
+    let access_token;
+    try {
+      access_token = await this.jwtService.signAsync(payload);
+      console.log('ACCES_TOKEN_TO_SEBN', access_token)
+    } catch (e) {
+      console.error('ACCESS_TOKEN__ERRPAYLOAD_________________________OR____', JSON.stringify(e));
+    }
+
+    return { access_token };
   }
 
   async validateUser(id :string): Promise<{ }> {
