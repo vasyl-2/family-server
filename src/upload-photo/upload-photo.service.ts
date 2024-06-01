@@ -41,7 +41,51 @@ export class UploadPhotoService implements OnModuleInit {
     await this.seeFolder();
     await this.seeVideoFolder();
 
-    this.videoWatcher.on('addDir', this. watchVideoFolder.bind(this));
+    this.videoWatcher.on('addDir', async(folder) => {
+      console.log('START_COPY__VIDEO__________________', folder)
+      const parentToId = new Map<string, string>();
+
+      let upperLevel = folder.replace(/\\/g, '/').replace(/^videos\//, '');
+      let parent: string;
+
+      if (upperLevel.includes("/")) {
+        let lastIndex = upperLevel.lastIndexOf("/");
+        parent = upperLevel.substring(0, lastIndex).split("/").pop();
+      }
+
+      let parentId: string;
+
+      if (parent) {
+        let hasValue = false;
+        for (const [key, value] of parentToId.entries()) {
+          if (value === parent) {
+            hasValue = true;
+            break;
+          }
+        }
+
+        const parentResp = await this.getVideoChapterByName(parent);
+
+        parentId = parentResp._id.toString();
+        parentToId.set(parent, parentId);
+      }
+
+      const createChapterUpperLevel: CreateChapterDto = {
+        title: upperLevel.replace(/^.*\//, ''),
+        readable_id: upperLevel.replace(/^.*\//, ''),
+        nameForUI: upperLevel.replace(/^.*\//, ''),
+        fullPath: upperLevel,
+        parent: parentId ? parentId : '',
+      }
+
+      try {
+        await this.createVideoChapterByFolder(createChapterUpperLevel);
+      } catch (e) {
+        console.error('created_____ERROR', e);
+      }
+
+      await this.getAllVideoFiles(folder);
+    });
 
     this.watcher.on('addDir', async (folder) => {
 
@@ -69,14 +113,9 @@ export class UploadPhotoService implements OnModuleInit {
         console.log('PARENT_BY__TO__GET____', parent)
         const parentResp = await this.getChapterByName(parent);
 
-        console.log('parentResp___________________', parentResp)
         parentId = parentResp._id.toString();
-        console.log('PARENT___ID______________', parentId)
         parentToId.set(parent, parentId);
       }
-
-      console.log('FOLDER____1', upperLevel);
-
 
       const createChapterUpperLevel: CreateChapterDto = {
         title: upperLevel.replace(/^.*\//, ''),
@@ -86,12 +125,9 @@ export class UploadPhotoService implements OnModuleInit {
         parent: parentId ? parentId : '',
       }
 
-      console.log('TODO_CREATE_________________', createChapterUpperLevel);
 
       try {
-        const upperLevelChapter = await this.createChapterByFolder(createChapterUpperLevel);
-        console.log('CREATED___UPPER____LEVEL____CHAPTER____', upperLevelChapter)
-
+        await this.createChapterByFolder(createChapterUpperLevel);
       } catch (e) {
         console.error('created_____ERROR', e);
       }
@@ -99,20 +135,8 @@ export class UploadPhotoService implements OnModuleInit {
       await this.getAllFiles(folder);
     });
 
-
     this.watcher.on('ready', () => console.log('watching for changes'));
     this.videoWatcher.on('ready', () => console.log('watching for video changes'));
-
-    // let allUpperLevelChaptersInDB;
-    // let allFolders;
-    // try {
-    //   const resp = await this.getAllUpperLevelChapters();
-    //   allUpperLevelChaptersInDB = resp.map((ch) => ch.title);
-    //   console.log('ALL_IN__DB____', allUpperLevelChaptersInDB)
-    // } catch (e) {
-    //   console.error('');
-    // }
-
   }
 
   private async seeFolder(): Promise<void> {
@@ -602,48 +626,48 @@ export class UploadPhotoService implements OnModuleInit {
 
   private async watchVideoFolder(folder) {
 
-    console.log('START_COPY__VIDEO__________________', folder)
-      const parentToId = new Map<string, string>();
-
-      let upperLevel = folder.replace(/\\/g, '/').replace(/^videos\//, '');
-      let parent: string;
-
-      if (upperLevel.includes("/")) {
-        let lastIndex = upperLevel.lastIndexOf("/");
-        parent = upperLevel.substring(0, lastIndex).split("/").pop();
-      }
-
-      let parentId: string;
-
-      if (parent) {
-        let hasValue = false;
-        for (const [key, value] of parentToId.entries()) {
-          if (value === parent) {
-            hasValue = true;
-            break;
-          }
-        }
-
-        const parentResp = await this.getVideoChapterByName(parent);
-
-        parentId = parentResp._id.toString();
-        parentToId.set(parent, parentId);
-      }
-
-      const createChapterUpperLevel: CreateChapterDto = {
-        title: upperLevel.replace(/^.*\//, ''),
-        readable_id: upperLevel.replace(/^.*\//, ''),
-        nameForUI: upperLevel.replace(/^.*\//, ''),
-        fullPath: upperLevel,
-        parent: parentId ? parentId : '',
-      }
-
-      try {
-        const upperLevelChapter = await this.createVideoChapterByFolder(createChapterUpperLevel);
-      } catch (e) {
-        console.error('created_____ERROR', e);
-      }
-
-      await this.getAllVideoFiles(folder);
+    // console.log('START_COPY__VIDEO__________________', folder)
+    //   const parentToId = new Map<string, string>();
+    //
+    //   let upperLevel = folder.replace(/\\/g, '/').replace(/^videos\//, '');
+    //   let parent: string;
+    //
+    //   if (upperLevel.includes("/")) {
+    //     let lastIndex = upperLevel.lastIndexOf("/");
+    //     parent = upperLevel.substring(0, lastIndex).split("/").pop();
+    //   }
+    //
+    //   let parentId: string;
+    //
+    //   if (parent) {
+    //     let hasValue = false;
+    //     for (const [key, value] of parentToId.entries()) {
+    //       if (value === parent) {
+    //         hasValue = true;
+    //         break;
+    //       }
+    //     }
+    //
+    //     const parentResp = await this.getVideoChapterByName(parent);
+    //
+    //     parentId = parentResp._id.toString();
+    //     parentToId.set(parent, parentId);
+    //   }
+    //
+    //   const createChapterUpperLevel: CreateChapterDto = {
+    //     title: upperLevel.replace(/^.*\//, ''),
+    //     readable_id: upperLevel.replace(/^.*\//, ''),
+    //     nameForUI: upperLevel.replace(/^.*\//, ''),
+    //     fullPath: upperLevel,
+    //     parent: parentId ? parentId : '',
+    //   }
+    //
+    //   try {
+    //     const upperLevelChapter = await this.createVideoChapterByFolder(createChapterUpperLevel);
+    //   } catch (e) {
+    //     console.error('created_____ERROR', e);
+    //   }
+    //
+    //   await this.getAllVideoFiles(folder);
   }
 }
