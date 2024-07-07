@@ -147,7 +147,10 @@ export class UploadPhotoService implements OnModuleInit {
   private async seeFolder(): Promise<void> {
     this.watcher = chokidarA.watch(
       this.rootFolder,
-      { ignoreInitial: true, ignored: this.ignored.map(f => `${f}/**`) }
+      { ignoreInitial: true,
+        ignored: this.ignored.map(f => `${f}/**`),
+        awaitWriteFinish: true
+      }
     );
   }
 
