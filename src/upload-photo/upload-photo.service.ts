@@ -44,6 +44,11 @@ export class UploadPhotoService implements OnModuleInit {
     await this.seeVideoFolder();
 
     this.videoWatcher.on('addDir', async(folder) => {
+
+      const prom = new Promise((res) => setTimeout(() => res(true), 60000));
+
+      await prom;
+
       console.log('START_COPY__VIDEO__________________', folder)
       const parentToId = new Map<string, string>();
 
@@ -157,7 +162,7 @@ export class UploadPhotoService implements OnModuleInit {
   private async seeVideoFolder(): Promise<void> {
     this.videoWatcher = chokidarA.watch(
       this.rootVideoFolder,
-      { ignoreInitial: true, ignored: this.ignoredVideo.map(f => `${f}/**`) }
+      { ignoreInitial: true, ignored: this.ignoredVideo.map(f => `${f}/**`), awaitWriteFinish: true }
     );
   }
 
