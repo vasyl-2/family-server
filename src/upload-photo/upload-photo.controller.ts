@@ -35,7 +35,6 @@ export class UploadPhotoController {
       storage: diskStorage({
         destination: function (req, file, cb) {
           if (req.headers.chaptername) {
-            console.log('CHAPTER_NAME______________________________________', req.headers.chaptername)
             cb(null, `${process.env.FILE_PATH}/${req.headers.chaptername}`);
           } else {
             cb(null, process.env.FILE_PATH);
