@@ -35,8 +35,10 @@ import { AuthModule } from './auth/auth.module';
       exclude: ['/api/(.*)'],
     }),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'files'),
-      renderPath: `/files`,
+      rootPath: join('C:', 'Users', 'HP', 'files'), // Using join with path segments
+      renderPath: '/files',
+      // rootPath: join(__dirname, '..', 'files'),
+      // renderPath: `/files`,
       exclude: ['/api/(.*)'],
     }),
     DevtoolsModule.register({

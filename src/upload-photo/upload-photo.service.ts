@@ -24,10 +24,12 @@ export class UploadPhotoService implements OnModuleInit {
   watcher: FSWatcher;
   videoWatcher: FSWatcher;
 
-  rootFolder = './files';
+  // rootFolder = './files';
+  rootFolder =  'C:\\Users\\HP\\files';
   rootVideoFolder = './videos';
 
-  ignored = ['files/father', 'files/mother', 'files/Evgen', 'files/Igor', 'files/Eva', 'files/Vasya', 'files/Dina', 'files/grandfather', 'files/grandmother'];
+  // ignored = ['files/father', 'files/mother', 'files/Evgen', 'files/Igor', 'files/Eva', 'files/Vasya', 'files/Dina', 'files/grandfather', 'files/grandmother'];
+  ignored = ['C:/Users/HP/files/father', 'C:/Users/HP/files/mother', 'C:/Users/HP/files/Evgen', 'C:/Users/HP/files/Igor', 'C:/Users/HP/files/Eva', 'C:/Users/HP/files/Vasya', 'C:/Users/HP/files/Dina', 'C:/Users/HP/files/grandfather', 'C:/Users/HP/files/grandmother'];
   ignoredVideo = ['videos/father', 'videos/mother', 'videos/Evgen', 'videos/Igor', 'videos/Eva', 'videos/Vasya', 'videos/Dina', 'videos/grandfather', 'videos/grandmother'];
 
   constructor(
@@ -91,7 +93,10 @@ export class UploadPhotoService implements OnModuleInit {
 
       const parentToId = new Map<string, string>();
 
-      let upperLevel = folder.replace(/\\/g, '/').replace(/^files\//, '');
+      // let upperLevel = folder.replace(/\\/g, '/').replace(/^files\//, '');
+      let upperLevel = folder.replace(/\\/g, '/').replace(/^C:\/Users\/HP\/files\//, '');
+
+      console.log('UPPER___LEVEL_____', upperLevel)
       let parent: string;
 
       if (upperLevel.includes("/")) {
@@ -192,7 +197,8 @@ export class UploadPhotoService implements OnModuleInit {
 
         console.group(`start------${fileOrFolder}`)
         let metaInfo: Stats;
-        const pathToFileOrFolder = path.join(folder, fileOrFolder).replace(/\\/g, "/").replace(/^files\//, '');
+        // const pathToFileOrFolder = path.join(folder, fileOrFolder).replace(/\\/g, "/").replace(/^files\//, '');
+        const pathToFileOrFolder = path.join(folder, fileOrFolder).replace(/\\/g, "/").replace(/^C:\/Users\/HP\/files\//, '');
         const pathToFileOrFolderToCheck = path.join(folder, fileOrFolder).replace(/\\/g, "/");
         console.log('PATH______________________________________', pathToFileOrFolder);
 
@@ -379,7 +385,8 @@ export class UploadPhotoService implements OnModuleInit {
       updatedDto.name = `${nameWithoutExtension}-${uniqueSuffix}.${extension}`;
 
 
-      await fsProm.rename(`files/${photo.fullPath}/${photo.name}`, `files/${updatedDto.fullPath}/${updatedDto.name}`);
+      // await fsProm.rename(`files/${photo.fullPath}/${photo.name}`, `files/${updatedDto.fullPath}/${updatedDto.name}`);
+      await fsProm.rename(`C:/Users/HP/files/${photo.fullPath}/${photo.name}`, `C:/Users/HP/files/${updatedDto.fullPath}/${updatedDto.name}`);
 
 
       result = await this.gallery.updateOne({ _id: updatedDto._id }, updatedDto).exec();
@@ -449,17 +456,18 @@ export class UploadPhotoService implements OnModuleInit {
       console.error('Unable create chapter!');
     }
 
+    //
     if (newChapter) {
       const { title } = newChapter;
       try {
         if (newChapter.parent) {
           const { fullPath } = newChapter;
-          if (!fs.existsSync(`${process.cwd()}/files/${fullPath}`)){
-            fs.mkdirSync(`${process.cwd()}/files/${fullPath}`);
+          if (!fs.existsSync(`C:/Users/HP/files/${fullPath}`)){
+            fs.mkdirSync(`C:/Users/HP/files/${fullPath}`);
           }
         } else {
           if (!fs.existsSync(`${title}`)){
-            fs.mkdirSync(`${process.cwd()}/files/${title}`);
+            fs.mkdirSync(`C:/Users/HP/files/${title}`);
             // this.watcher.removeListener()
           }
         }
@@ -485,12 +493,12 @@ export class UploadPhotoService implements OnModuleInit {
       try {
         if (newChapter.parent) {
           const { fullPath } = newChapter;
-          if (!fs.existsSync(`${process.cwd()}/videos/${fullPath}`)){
-            fs.mkdirSync(`${process.cwd()}/videos/${fullPath}`);
+          if (!fs.existsSync(`C:/Users/HP/files/videos/${fullPath}`)){
+            fs.mkdirSync(`C:/Users/HP/files/videos/${fullPath}`);
           }
         } else {
           if (!fs.existsSync(`${title}`)){
-            fs.mkdirSync(`${process.cwd()}/videos/${title}`);
+            fs.mkdirSync(`C:/Users/HP/files/videos/${title}`);
             // this.watcher.removeListener()
           }
         }
