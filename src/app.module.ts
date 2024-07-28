@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { MulterModule } from '@nestjs/platform-express';
 import { DevtoolsModule } from '@nestjs/devtools-integration';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ServeStaticModule } from '@nestjs/serve-static';
@@ -35,7 +34,7 @@ import { AuthModule } from './auth/auth.module';
       exclude: ['/api/(.*)'],
     }),
     ServeStaticModule.forRoot({
-      rootPath: join('C:', 'Users', 'HP', 'files'), // Using join with path segments
+      rootPath: join('N:', 'Users', 'HP', 'files'), // Using join with path segments
       renderPath: '/files',
       // rootPath: join(__dirname, '..', 'files'),
       // renderPath: `/files`,

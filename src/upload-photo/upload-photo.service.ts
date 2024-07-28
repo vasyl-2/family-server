@@ -25,11 +25,11 @@ export class UploadPhotoService implements OnModuleInit {
   videoWatcher: FSWatcher;
 
   // rootFolder = './files';
-  rootFolder =  'C:\\Users\\HP\\files';
+  rootFolder =  `N:\\Users\\HP\\files`;
   rootVideoFolder = './videos';
 
   // ignored = ['files/father', 'files/mother', 'files/Evgen', 'files/Igor', 'files/Eva', 'files/Vasya', 'files/Dina', 'files/grandfather', 'files/grandmother'];
-  ignored = ['C:/Users/HP/files/father', 'C:/Users/HP/files/mother', 'C:/Users/HP/files/Evgen', 'C:/Users/HP/files/Igor', 'C:/Users/HP/files/Eva', 'C:/Users/HP/files/Vasya', 'C:/Users/HP/files/Dina', 'C:/Users/HP/files/grandfather', 'C:/Users/HP/files/grandmother'];
+  ignored = [`N:/Users/HP/files/father`, `N:/Users/HP/files/mother`, `N:/Users/HP/files/Evgen`, `N:/Users/HP/files/Igor`, `N:/Users/HP/files/Eva`, `N:/Users/HP/files/Vasya`, `N:/Users/HP/files/Dina`, `N:/Users/HP/files/grandfather`, `N:/Users/HP/files/grandmother`];
   ignoredVideo = ['videos/father', 'videos/mother', 'videos/Evgen', 'videos/Igor', 'videos/Eva', 'videos/Vasya', 'videos/Dina', 'videos/grandfather', 'videos/grandmother'];
 
   constructor(
@@ -44,6 +44,11 @@ export class UploadPhotoService implements OnModuleInit {
     await this.seeVideoFolder();
 
     this.videoWatcher.on('addDir', async(folder) => {
+
+      const prom = new Promise((res) => setTimeout(() => res(true), 60000));
+
+      await prom;
+
       console.log('START_COPY__VIDEO__________________', folder)
       const parentToId = new Map<string, string>();
 
@@ -94,7 +99,7 @@ export class UploadPhotoService implements OnModuleInit {
       const parentToId = new Map<string, string>();
 
       // let upperLevel = folder.replace(/\\/g, '/').replace(/^files\//, '');
-      let upperLevel = folder.replace(/\\/g, '/').replace(/^C:\/Users\/HP\/files\//, '');
+      let upperLevel = folder.replace(/\\/g, '/').replace(/^N:\/Users\/HP\/files\//, '');
 
       console.log('UPPER___LEVEL_____', upperLevel)
       let parent: string;
@@ -137,7 +142,10 @@ export class UploadPhotoService implements OnModuleInit {
         console.error('created_____ERROR', e);
       }
 
-      await this.getAllFiles(folder);
+      setTimeout(async () => {
+        await this.getAllFiles(folder);
+      }, 40000)
+
     });
 
     this.watcher.on('ready', () => console.log('watching for changes'));
@@ -157,7 +165,7 @@ export class UploadPhotoService implements OnModuleInit {
   private async seeVideoFolder(): Promise<void> {
     this.videoWatcher = chokidarA.watch(
       this.rootVideoFolder,
-      { ignoreInitial: true, ignored: this.ignoredVideo.map(f => `${f}/**`) }
+      { ignoreInitial: true, ignored: this.ignoredVideo.map(f => `${f}/**`), awaitWriteFinish: true }
     );
   }
 
@@ -187,21 +195,23 @@ export class UploadPhotoService implements OnModuleInit {
   private async getAllFiles(folder) {
     let allFiles: string[];
 
+    console.log('FOLDER____', folder);
     try {
       allFiles = await fsProm.readdir(folder);
     } catch (e) {
       console.error('ERROR_WHILE_READ_DIR__', JSON.stringify(e));
     }
 
+    console.log('ALL_FILES___________:', allFiles);
     if (allFiles.length) {
-      console.log('ALL_FILES___________:', allFiles);
+
 
       for (const fileOrFolder of allFiles) {
 
         console.group(`start------${fileOrFolder}`)
         let metaInfo: Stats;
         // const pathToFileOrFolder = path.join(folder, fileOrFolder).replace(/\\/g, "/").replace(/^files\//, '');
-        const pathToFileOrFolder = path.join(folder, fileOrFolder).replace(/\\/g, "/").replace(/^C:\/Users\/HP\/files\//, '');
+        const pathToFileOrFolder = path.join(folder, fileOrFolder).replace(/\\/g, "/").replace(/^N:\/Users\/HP\/files\//, '');
         const pathToFileOrFolderToCheck = path.join(folder, fileOrFolder).replace(/\\/g, "/");
         console.log('PATH______________________________________', pathToFileOrFolder);
 
@@ -389,7 +399,7 @@ export class UploadPhotoService implements OnModuleInit {
 
 
       // await fsProm.rename(`files/${photo.fullPath}/${photo.name}`, `files/${updatedDto.fullPath}/${updatedDto.name}`);
-      await fsProm.rename(`C:/Users/HP/files/${photo.fullPath}/${photo.name}`, `C:/Users/HP/files/${updatedDto.fullPath}/${updatedDto.name}`);
+      await fsProm.rename(`N:/Users/HP/files/${photo.fullPath}/${photo.name}`, `N:/Users/HP/files/${updatedDto.fullPath}/${updatedDto.name}`);
 
 
       result = await this.gallery.updateOne({ _id: updatedDto._id }, updatedDto).exec();
@@ -465,12 +475,12 @@ export class UploadPhotoService implements OnModuleInit {
       try {
         if (newChapter.parent) {
           const { fullPath } = newChapter;
-          if (!fs.existsSync(`C:/Users/HP/files/${fullPath}`)){
-            fs.mkdirSync(`C:/Users/HP/files/${fullPath}`);
+          if (!fs.existsSync(`N:/Users/HP/files/${fullPath}`)){
+            fs.mkdirSync(`N:/Users/HP/files/${fullPath}`);
           }
         } else {
           if (!fs.existsSync(`${title}`)){
-            fs.mkdirSync(`C:/Users/HP/files/${title}`);
+            fs.mkdirSync(`N:/Users/HP/files/${title}`);
             // this.watcher.removeListener()
           }
         }
@@ -496,12 +506,12 @@ export class UploadPhotoService implements OnModuleInit {
       try {
         if (newChapter.parent) {
           const { fullPath } = newChapter;
-          if (!fs.existsSync(`C:/Users/HP/files/videos/${fullPath}`)){
-            fs.mkdirSync(`C:/Users/HP/files/videos/${fullPath}`);
+          if (!fs.existsSync(`N:/Users/HP/files/videos/${fullPath}`)){
+            fs.mkdirSync(`N:/Users/HP/files/videos/${fullPath}`);
           }
         } else {
           if (!fs.existsSync(`${title}`)){
-            fs.mkdirSync(`C:/Users/HP/files/videos/${title}`);
+            fs.mkdirSync(`N:/Users/HP/files/videos/${title}`);
             // this.watcher.removeListener()
           }
         }
