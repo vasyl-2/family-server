@@ -4,6 +4,7 @@ import { UserDocument } from './schemas/user.schem';
 import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import { CustomJwtPayload } from './jwt.strategy';
+import { UserDTO } from './dto/user-dto';
 
 @Injectable()
 export class AuthService {
@@ -14,7 +15,22 @@ export class AuthService {
   ) {
   }
 
-  async addUser(userDto) {
+  async getUsers() {
+    let users;
+
+    try {
+      users = await this.auth.find().exec();
+    } catch (e) {
+
+    }
+
+    console.log('FOUND USERS__________', users);
+    return users;
+  }
+
+
+
+  async addUser(userDto: UserDTO) {
     try {
       const user = new this.auth(userDto);
 
