@@ -1,8 +1,9 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { UserDocument } from './schemas/user.schem';
 import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
+
+import { UserDocument } from './schemas/user.schem';
 import { CustomJwtPayload } from './jwt.strategy';
 import { UserDTO } from './dto/user-dto';
 

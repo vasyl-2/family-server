@@ -9,15 +9,16 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UploadPhotoModule } from './upload-photo/upload-photo.module';
 import { AuthModule } from './auth/auth.module';
+import { Connection } from 'mongoose';
 
-
+const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/gallery'; // localhost
 @Module({
   imports: [
     UploadPhotoModule,
     ConfigModule.forRoot({
       envFilePath: '.env',
     }),
-    MongooseModule.forRoot('mongodb://127.0.0.1:27017/gallery'), // localhost
+    MongooseModule.forRoot(mongoUri),
     AuthModule,
     // MulterModule.register({
     //   dest: process.env.FILE_PATH,
@@ -35,7 +36,8 @@ import { AuthModule } from './auth/auth.module';
     }),
     ServeStaticModule.forRoot({
       rootPath: join('N:', 'Users', 'HP', 'files'), // Using join with path segments
-      renderPath: '/files',
+      serveRoot: '/static-api/family-back',
+      // renderPath: '/files',
       // rootPath: join(__dirname, '..', 'files'),
       // renderPath: `/files`,
       exclude: ['/api/(.*)'],
