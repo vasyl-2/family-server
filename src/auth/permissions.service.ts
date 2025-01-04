@@ -14,9 +14,20 @@ export class PermissionsService implements PermissionsServiceInterface {
   ) {
   }
 
+  async getPermissionsByRolesIds(rolesIds: string[]): Promise<PermissionDto[]> {
+    let permissions: PermissionDto[];
 
-  async getPermissionsByRoleId(): Promise<PermissionDto[]> {
-    return Promise.resolve([]);
+    try {
+      permissions = await this.permissions.find({
+        roles: {
+          $in: rolesIds
+        }
+      })
+    } catch(err) {
+      console.error('during receiving permissions by role id', JSON.stringify(err));
+    }
+
+    return permissions;
   }
 
   async createPermission(): Promise<PermissionDto> {

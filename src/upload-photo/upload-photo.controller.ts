@@ -7,7 +7,7 @@ import {
   Param,
   Delete,
   UseInterceptors,
-  UploadedFile, ParseFilePipe, UseGuards, StreamableFile, Header, SetMetadata,
+  UploadedFile, ParseFilePipe, UseGuards, StreamableFile, Header,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { parse } from 'path';
@@ -18,7 +18,6 @@ import { UploadPhotoService } from './upload-photo.service';
 import { CreateUploadPhotoDto } from './dto/create-upload-photo.dto';
 import { UpdateUploadPhotoDto } from './dto/update-upload-photo.dto';
 import { CreateChapterDto } from './dto/create-chapter';
-import { AuthGuard } from '../auth/auth.guard';
 import { AuthPassportGuard } from '../auth/auth-passport.guard';
 import { createReadStream } from 'fs';
 import { CreateVideoDto } from './dto/create-video.dto';
@@ -136,17 +135,18 @@ export class UploadPhotoController {
   // @UseGuards(AuthGuard)
   // @SetMetadata('roles', ['admin'])
   // @Roles(['admin'])
-  // @Permissions(['see_all', 'edit_user'])
-  // @UseGuards(AuthPassportGuard, PermissionGuard)
+  @Permissions(['see_all', 'edit_user'])
+  @UseGuards(AuthPassportGuard, PermissionGuard)
   @Get('chapters')
   async getChapters() {
-    console.log('REQ________!!!')
-    return this.uploadPhotoService.getAllChapters()
+    const resp = await this.uploadPhotoService.getAllChapters();
+    console.log('CHAPTERS__________!!!', resp[0]);
+    return resp;
   }
 
   // @UseGuards(AuthGuard)
-  // @Permissions(['see_all', 'edit_user'])
-  // @UseGuards(AuthPassportGuard, PermissionGuard)
+  @Permissions(['see_all', 'edit_user'])
+  @UseGuards(AuthPassportGuard, PermissionGuard)
   @Get('video-chapters')
   async getVideoChapters() {
     return this.uploadPhotoService.getAllVideoChapters()

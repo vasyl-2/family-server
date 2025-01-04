@@ -39,7 +39,7 @@ export class RoleService implements RoleServiceInterface {
     return roles;
   }
 
-  async getRoleById(roleId: string): Promise<RoleDto[]> {
+  async getRoleById(roleId: string): Promise<RoleDto> {
     // let roles: RoleDto[];
     let role: any;
 
@@ -47,12 +47,12 @@ export class RoleService implements RoleServiceInterface {
       role = await this.role.findById(roleId).exec();
       console.log('ROLES____', role);
     } catch(e) {
-
+      console.error(`during get role by id: ${JSON.stringify(e)}`);
     }
     return role;
   }
 
-  async getRolesByIds(ids: string[]): Promise<any> {
+  async getRolesByIds(ids: string[]): Promise<any[]> {
     return this.role.find({
       _id: { $in: ids },
     }).exec();

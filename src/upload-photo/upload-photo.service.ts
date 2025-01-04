@@ -531,8 +531,7 @@ export class UploadPhotoService implements OnModuleInit {
       console.error('CHAPTERS___ERROR_RR____', JSON.stringify(e));
     }
 
-    // console.log('CHAPTERS__SUCCESS________', result);
-
+    console.log('CHAPTERS__SUCCESS________', result[0]);
 
     return result;
   }
