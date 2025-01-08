@@ -1,20 +1,38 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { UserDocument } from './schemas/user.schem';
 import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
-import { CustomJwtPayload } from './jwt.strategy';
+
+import { UserDocument } from './schemas/user.schem';
+import { UserDTO } from './dto/user-dto';
+import { PermissionsService } from './permissions.service';
+import { PermissionDto } from './dto/permission-dto';
 
 @Injectable()
 export class AuthService {
 
   constructor(
     @InjectModel('Auth') private readonly auth: Model<UserDocument>,
-    private jwtService: JwtService,
+    private jwtService: JwtService, private permissionService: PermissionsService
   ) {
   }
 
-  async addUser(userDto) {
+  async getUsers() {
+    let users;
+
+    try {
+      users = await this.auth.find().exec();
+    } catch (e) {
+
+    }
+
+    console.log('FOUND USERS__________', users);
+    return users;
+  }
+
+
+
+  async addUser(userDto: UserDTO) {
     try {
       const user = new this.auth(userDto);
 
@@ -37,7 +55,20 @@ export class AuthService {
 
     console.log('RESPPPPP_________________', resp)
 
-    const payload = { sub: resp._id, email: resp.email };
+    const roleIds = resp.role.map((r) => r.toString());
+
+    let permissions: PermissionDto[];
+    try {
+      permissions = await this.permissionService.getPermissionsByRolesIds(roleIds);
+      console.log('PERMS_________', permissions);
+    } catch (err) {
+      console.error('ROLES_ERROR_______', JSON.stringify(err));
+    }
+
+    const permissionIds = permissions.map(p => p._id.toString());
+
+
+    const payload = { sub: resp._id, email: resp.email, role: resp.role, permissions: permissionIds };
     let access_token;
     try {
       access_token = await this.jwtService.signAsync(payload);
@@ -50,7 +81,6 @@ export class AuthService {
   }
 
   async validateUser(id :string): Promise<{ }> {
-    const i = id;
     const resp = await this.auth.findById(id).exec();
 
     if (!resp) {
@@ -58,7 +88,6 @@ export class AuthService {
     }
 
     const { password, ...rest } = resp;
-
     return rest;
   }
 }

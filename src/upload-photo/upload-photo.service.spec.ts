@@ -15,4 +15,11 @@ describe('UploadPhotoService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
+
+  describe('onModuleInit', () => {
+
+    test('', async () => {
+
+    })
+  })
 });

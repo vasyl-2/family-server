@@ -10,6 +10,7 @@ import { PhotoValidatorService } from './photo-validator/photo-validator.service
 import { AuthModule } from '../auth/auth.module';
 import { Video, VideoSchema } from './video-schema';
 import { VideoChapter, VideoChapterSchema } from './video-chapter-schema';
+import { PermissionGuard } from '../auth/guards/permission.guard';
 
 @Module({
   imports: [

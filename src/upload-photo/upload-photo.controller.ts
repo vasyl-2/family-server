@@ -7,23 +7,22 @@ import {
   Param,
   Delete,
   UseInterceptors,
-  UploadedFile, ParseFilePipe, UseGuards, Res, StreamableFile, Header, Put,
+  UploadedFile, ParseFilePipe, UseGuards, StreamableFile, Header,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { parse } from 'path';
 import { diskStorage } from 'multer';
 import { join } from 'path';
-import type { Response } from 'express';
 
 import { UploadPhotoService } from './upload-photo.service';
 import { CreateUploadPhotoDto } from './dto/create-upload-photo.dto';
 import { UpdateUploadPhotoDto } from './dto/update-upload-photo.dto';
 import { CreateChapterDto } from './dto/create-chapter';
-import { AuthGuard } from '../auth/auth.guard';
 import { AuthPassportGuard } from '../auth/auth-passport.guard';
-import { createReadStream, readFileSync } from 'fs';
-import { Gallery } from './gallery.schema';
+import { createReadStream } from 'fs';
 import { CreateVideoDto } from './dto/create-video.dto';
+import { Permissions } from '../auth/decorators/permissions.decorator';
+import { PermissionGuard } from '../auth/guards/permission.guard';
 
 @Controller('upload-photo')
 export class UploadPhotoController {
@@ -134,15 +133,20 @@ export class UploadPhotoController {
   }
 
   // @UseGuards(AuthGuard)
-  @UseGuards(AuthPassportGuard)
+  // @SetMetadata('roles', ['admin'])
+  // @Roles(['admin'])
+  @Permissions(['see_all', 'edit_user'])
+  @UseGuards(AuthPassportGuard, PermissionGuard)
   @Get('chapters')
   async getChapters() {
-    console.log('REQ________!!!')
-    return this.uploadPhotoService.getAllChapters()
+    const resp = await this.uploadPhotoService.getAllChapters();
+    console.log('CHAPTERS__________!!!', resp[0]);
+    return resp;
   }
 
   // @UseGuards(AuthGuard)
-  @UseGuards(AuthPassportGuard)
+  @Permissions(['see_all', 'edit_user'])
+  @UseGuards(AuthPassportGuard, PermissionGuard)
   @Get('video-chapters')
   async getVideoChapters() {
     return this.uploadPhotoService.getAllVideoChapters()

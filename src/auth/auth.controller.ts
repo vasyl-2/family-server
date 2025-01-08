@@ -1,5 +1,6 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, UnauthorizedException } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { UserDTO } from './dto/user-dto';
 
 @Controller('auth')
 export class AuthController {
@@ -9,9 +10,33 @@ export class AuthController {
   ) {
   }
 
-  @Post()
-  async addUser() {
+  @HttpCode(HttpStatus.OK)
+  @Get()
+  async getUsers() {
+    let users;
 
+    try {
+      users = await this.authService.getUsers();
+    } catch (e) {
+
+    }
+
+    return users;
+  }
+
+
+  @HttpCode(HttpStatus.OK)
+  @Post()
+  async addUser(user: UserDTO): Promise<{ userId: string }> {
+
+    let userId: string;
+    try {
+
+    } catch(err) {
+
+    }
+
+    return { userId };
   }
 
   @HttpCode(HttpStatus.OK)

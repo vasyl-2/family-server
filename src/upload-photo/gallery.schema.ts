@@ -11,9 +11,10 @@ export class Gallery {
   // @Prop({ type: mongoose.Schema.Types.ObjectId })
   // _id?: string;
 
-  @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Chapter' })
+  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Chapter' }] })
   // chapter: Chapter;
-  chapter: { type: mongoose.Schema.Types.ObjectId, ref: 'Chapter' };
+  // chapter: { type: mongoose.Schema.Types.ObjectId, ref: 'Chapter' };
+  chapter: mongoose.Schema.Types.ObjectId;
 
   @Prop()
   title?: string;
