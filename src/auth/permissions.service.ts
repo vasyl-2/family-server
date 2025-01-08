@@ -43,6 +43,14 @@ export class PermissionsService implements PermissionsServiceInterface {
   }
 
   async getPermissions(): Promise<PermissionDto[]> {
-    return Promise.resolve([]);
+    let permissions: PermissionDto[];
+
+    try {
+      permissions = await this.permissions.find();
+    } catch(err) {
+
+    }
+
+    return permissions;
   }
 }
