@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, HttpCode, HttpStatus, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Post, Put } from '@nestjs/common';
 
 import { RoleServiceInterface } from './models/role.service.interface';
 import { RoleDto } from './dto/role-dto';
@@ -14,16 +14,16 @@ export class RoleController implements RoleServiceInterface {
 
   @HttpCode(HttpStatus.OK)
   @Post()
-  async createRole(): Promise<RoleDto> {
-    let role: RoleDto;
+  async createRole(@Body() role: RoleDto): Promise<RoleDto> {
+    let roleToCreate: RoleDto;
 
     try {
-      role = await this.roleService.createRole();
+      roleToCreate = await this.roleService.createRole(role);
     } catch(e) {
-
+      console.error('CREATE__ROLE___ERROR___', JSON.stringify(e));
     }
 
-    return role;
+    return roleToCreate;
   }
 
   @HttpCode(HttpStatus.OK)
@@ -43,16 +43,16 @@ export class RoleController implements RoleServiceInterface {
 
   @HttpCode(HttpStatus.OK)
   @Put()
-  async editRole(): Promise<RoleDto> {
-    let role: RoleDto;
+  async editRole(@Body() role: RoleDto): Promise<RoleDto> {
+    let roleToEdit: RoleDto;
 
     try {
-      role = await this.roleService.editRole();
+      roleToEdit = await this.roleService.editRole(role);
     } catch(e) {
-
+        console.error('EDIT__ROLE___ERROR___', JSON.stringify(e));
     }
 
-    return role;
+    return roleToEdit;
   }
 
   @HttpCode(HttpStatus.OK)
