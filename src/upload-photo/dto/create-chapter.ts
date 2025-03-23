@@ -6,4 +6,5 @@ export class CreateChapterDto {
  _id?: string;
  id?: string;
  parent?: string;
+ description?: string;
 }

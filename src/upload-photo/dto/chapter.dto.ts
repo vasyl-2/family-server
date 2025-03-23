@@ -6,4 +6,5 @@ export class ChapterDto {
   _id?: string;
   id?: string;
   parent?: string;
+  description?: string;
 }

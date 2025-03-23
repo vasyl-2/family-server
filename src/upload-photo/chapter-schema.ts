@@ -26,7 +26,6 @@ export class Chapter {
 
   @Prop()
   fullPath?: string;
-
 }
 
 export const ChapterSchema = SchemaFactory.createForClass(Chapter);
