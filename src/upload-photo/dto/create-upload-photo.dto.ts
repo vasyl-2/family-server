@@ -5,6 +5,7 @@ export class CreateUploadPhotoDto {
   chapter?: string;
   name?: string;
   fullPath?: string;
+  date?: Date;
 }
 
 // export class CreateUploadPhotoDto {

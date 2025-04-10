@@ -5,4 +5,5 @@ export class CreateVideoDto {
   chapter?: string;
   name?: string;
   fullPath?: string;
+  date?: Date;
 }
