@@ -395,10 +395,18 @@ export class UploadPhotoService implements OnModuleInit {
       const isEqual = updatedDto.name === video.name;
       console.log('IS__NAME___EQUAL____', isEqual);
 
+      if (!isEqual) {
+        await fsProm.rename(`N:/Users/HP/files/${video.fullPath}/${video.name}`, `N:/Users/HP/files/${updatedDto.fullPath}/${updatedDto.name}`);
+      }
+
+      result = await this.video.updateOne({ _id: updatedDto._id }, updatedDto).exec();
+
 
     } catch (e) {
       console.log('ERROR___WHILE___UPDATE______', JSON.stringify(e));
     }
+
+    return updatedDto;
   }
 
   async updatePhoto(updatedDto: CreateUploadPhotoDto) {
