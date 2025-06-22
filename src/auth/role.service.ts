@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { RoleServiceInterface } from './models/role.service.interface';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 
+import { RoleServiceInterface } from './models/role.service.interface';
 import { Role, RoleDocument } from './schemas/role.schema';
 import { RoleDto } from './dto/role-dto';
 
@@ -14,15 +14,31 @@ export class RoleService implements RoleServiceInterface {
   ) {
   }
 
-  async createRole(): Promise<RoleDto> {
-    return Promise.resolve(undefined);
+  async createRole(role: RoleDto): Promise<RoleDto> {
+    console.log('NEW___ROLE_____', role);
+    let createdRole;
+    let createdRoleTOAdd;
+    try {
+      createdRoleTOAdd = new this.role(role);
+    } catch(e) {
+      console.error('CREATE_ERROR___1', JSON.stringify(e));
+    }
+
+    try {
+      createdRole = await createdRoleTOAdd.save();
+    } catch (e) {
+      console.error('CREATE___ROLE____2', JSON.stringify(e));
+    }
+
+    console.log('RESULT_______', createdRole);
+    return createdRole;
   }
 
   async deleteRole(): Promise<string> {
     return Promise.resolve('');
   }
 
-  async editRole(): Promise<RoleDto> {
+  async editRole(role: RoleDto): Promise<RoleDto> {
     return Promise.resolve(undefined);
   }
 

@@ -26,6 +26,8 @@ export class Video {
   @Prop()
   fullPath?: string;
 
+  @Prop()
+  date?: Date;
 }
 
 export const VideoSchema = SchemaFactory.createForClass(Video);

@@ -379,6 +379,36 @@ export class UploadPhotoService implements OnModuleInit {
     return result;
   }
 
+  async updateVideo(updatedDto: CreateVideoDto) {
+    const video = await this.video.findById(updatedDto._id);
+    console.log('VIDEO___TO____UPDATE_______', video);
+
+    if (!video) {
+      console.log('NO___VIDEO_____________');
+      throw new Error('Video not found_________');
+    }
+
+    console.log('VIDEO__TO___SAVE____', updatedDto);
+    let result;
+
+    try {
+      const isEqual = updatedDto.name === video.name;
+      console.log('IS__NAME___EQUAL____', isEqual);
+
+      if (!isEqual) {
+        await fsProm.rename(`N:/Users/HP/files/${video.fullPath}/${video.name}`, `N:/Users/HP/files/${updatedDto.fullPath}/${updatedDto.name}`);
+      }
+
+      result = await this.video.updateOne({ _id: updatedDto._id }, updatedDto).exec();
+
+
+    } catch (e) {
+      console.log('ERROR___WHILE___UPDATE______', JSON.stringify(e));
+    }
+
+    return updatedDto;
+  }
+
   async updatePhoto(updatedDto: CreateUploadPhotoDto) {
 
     const photo = await this.gallery.findById(updatedDto._id);
@@ -391,16 +421,21 @@ export class UploadPhotoService implements OnModuleInit {
 
     let result;
     try {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+      // const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
       const extension = updatedDto.name.split('.').pop();
       let nameWithoutExtension = this.removeExtension(updatedDto.name);
 
-      updatedDto.name = `${nameWithoutExtension}-${uniqueSuffix}.${extension}`;
+      // updatedDto.name = `${nameWithoutExtension}-${uniqueSuffix}.${extension}`;
+      // updatedDto.name = `${nameWithoutExtension}.${extension}`;
 
+      const isEqual = updatedDto.name === photo.name;
+      console.log('IS__NAME___EQUAL____', isEqual);
 
+      if (!isEqual) {
+        await fsProm.rename(`N:/Users/HP/files/${photo.fullPath}/${photo.name}`, `N:/Users/HP/files/${updatedDto.fullPath}/${updatedDto.name}`);
+      }
       // await fsProm.rename(`files/${photo.fullPath}/${photo.name}`, `files/${updatedDto.fullPath}/${updatedDto.name}`);
-      await fsProm.rename(`N:/Users/HP/files/${photo.fullPath}/${photo.name}`, `N:/Users/HP/files/${updatedDto.fullPath}/${updatedDto.name}`);
-
+      // await fsProm.rename(`N:/Users/HP/files/${photo.fullPath}/${photo.name}`, `N:/Users/HP/files/${updatedDto.fullPath}/${updatedDto.name}`);
 
       result = await this.gallery.updateOne({ _id: updatedDto._id }, updatedDto).exec();
       console.log('RESULT___RENAMED_______________', result);
@@ -531,7 +566,7 @@ export class UploadPhotoService implements OnModuleInit {
       console.error('CHAPTERS___ERROR_RR____', JSON.stringify(e));
     }
 
-    console.log('CHAPTERS__SUCCESS________', result[0]);
+    console.log('CHAPTERS__SUCCESS________', result);
 
     return result;
   }

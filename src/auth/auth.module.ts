@@ -35,7 +35,7 @@ import { PermissionGuard } from './guards/permission.guard';
         // secret: config.get<string>('JWT_SECRET'),
         signOptions: {
           // expiresIn: config.get<string | number>('JWT_EXPIRE'),
-          expiresIn: '8h',
+          expiresIn: '12h',
         },
       }),
     }),

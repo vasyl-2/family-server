@@ -9,6 +9,9 @@ export class Permissions {
   @Prop({ unique: [true, 'Duplicated permission'], required: [true] })
   name: string;
 
+  @Prop()
+  displayName?: string;
+
   @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Role' }] })
   roles?: mongoose.Schema.Types.ObjectId[];
 }

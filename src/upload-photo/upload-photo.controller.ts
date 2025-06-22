@@ -83,7 +83,7 @@ export class UploadPhotoController {
 
   @Post('uploadvideo')
   @UseInterceptors(
-    FileInterceptor('photo', {
+    FileInterceptor('video', {
       storage: diskStorage({
         destination: function (req, file, cb) {
           if (req.headers.chaptername) {
@@ -94,9 +94,9 @@ export class UploadPhotoController {
           }
         },
         filename: (req, file: Express.Multer.File, cB) => {
-          const _this = this;
           const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
           let fileName = parse(file.originalname).name.replace(/\s/g, 'mmm');
+          fileName = Buffer.from(fileName, 'latin1').toString('utf8');
           fileName = `${fileName}-${uniqueSuffix}`;
 
           const extension = parse(file.originalname).ext;
@@ -231,6 +231,13 @@ export class UploadPhotoController {
     console.log('ID___TO__RENAME__________', id);
     console.log('BODY____TO___RENAME_____', body);
     return this.uploadPhotoService.updatePhoto(body.photo);
+  }
+
+  @Patch('updatevideo/:id')
+  updateVideo(@Param('id') id: string, @Body() body: { video: any }) {
+    console.log('ID___TO__RENAME__________', id);
+    console.log('BODY____TO___RENAME_____', body);
+    return this.uploadPhotoService.updateVideo(body.video);
   }
 
 }
