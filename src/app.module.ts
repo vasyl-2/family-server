@@ -9,7 +9,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UploadPhotoModule } from './upload-photo/upload-photo.module';
 import { AuthModule } from './auth/auth.module';
-import { Connection } from 'mongoose';
 
 const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/gallery'; // localhost
 @Module({
@@ -31,11 +30,6 @@ const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/gallery'; /
     // }),
 
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'videos'),
-      renderPath: `/videos`,
-      exclude: ['/api/(.*)'],
-    }),
-    ServeStaticModule.forRoot({
       rootPath: join('N:', 'Users', 'HP', 'files'), // Using join with path segments for usual server
       // rootPath: join('/usr/src/app', 'files'), // Using join with path segments for k8s
       serveRoot: '/static-api/family-back',
@@ -47,11 +41,10 @@ const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/gallery'; /
     DevtoolsModule.register({
       http: process.env.NODE_ENV !== 'production',
     }),
-    // MongooseModule.forRoot('mongodb+srv://vasya:bawnrRMjhiU84ZNH@cluster0.3lzisnz.mongodb.net/test'),
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {}
 
-// bawnrRMjhiU84ZNH
+
