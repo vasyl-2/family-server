@@ -46,6 +46,11 @@ export class AuthService {
   async signIn(creds: { email: string; password: string; } ): Promise<{ access_token: string; } | null> {
 
     const resp = await this.auth.findOne({ email: creds.email }).exec();
+
+    if (!resp) {
+      console.error('Incorrect user');
+    }
+
     const isPasswordCorrect = await bcrypt.compare(creds.password, resp.password);
 
     if (!isPasswordCorrect) {

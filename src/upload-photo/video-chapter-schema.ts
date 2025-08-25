@@ -5,7 +5,6 @@ export type VideoChapterDocument = HydratedDocument<VideoChapter>;
 
 @Schema({ collection: 'video-chapters' })
 export class VideoChapter {
-
   // @Prop({ type: mongoose.Schema.Types.ObjectId })
   // _id?: string;
 
@@ -26,7 +25,6 @@ export class VideoChapter {
 
   @Prop()
   fullPath?: string;
-
 }
 
 export const VideoChapterSchema = SchemaFactory.createForClass(VideoChapter);

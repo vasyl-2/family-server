@@ -1,4 +1,4 @@
-export class CreateUploadPhotoDto {
+export class CreatePdfDto {
   _id?: string;
   title: string;
   description?: string;
@@ -7,4 +7,3 @@ export class CreateUploadPhotoDto {
   fullPath?: string;
   date?: Date;
 }
-

@@ -19,7 +19,6 @@ export class UserController implements UserServiceInterface {
 
     try {
       user = await this.userService.createUser(userDto);
-      console.log('USER_CREATED_____', user)
     } catch(e) {
 
     }
@@ -43,7 +42,6 @@ export class UserController implements UserServiceInterface {
   @HttpCode(HttpStatus.OK)
   @Put()
   async editUser(@Body() userDto: Partial<UserDTO>): Promise<Partial<UserDTO>> {
-    console.log('EDIT_USER___!!!!', userDto);
     let user: Partial<UserDTO>;
 
     try {

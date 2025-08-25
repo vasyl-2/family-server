@@ -9,7 +9,6 @@ import { FSWatcher } from 'fs';
 import { Stats } from 'node:fs';
 
 import { CreateUploadPhotoDto } from './dto/create-upload-photo.dto';
-import { UpdateUploadPhotoDto } from './dto/update-upload-photo.dto';
 import { Gallery, GalleryDocument } from './gallery.schema';
 import { CreateChapterDto } from './dto/create-chapter';
 import { Chapter, ChapterDocument } from './chapter-schema';
@@ -17,91 +16,38 @@ import { CreateVideoDto } from './dto/create-video.dto';
 import { VideoDocument } from './video-schema';
 import { Video } from './video-schema';
 import { VideoChapterDocument } from './video-chapter-schema';
+import { fileTypeFromFile } from 'file-type';
+import { CreatePdfDto } from './dto/create-pdf.dto';
+import { DocDocument } from './doc.schema';
 
 @Injectable()
 export class UploadPhotoService implements OnModuleInit {
 
   watcher: FSWatcher;
-  videoWatcher: FSWatcher;
 
   // rootFolder = './files';
   rootFolder =  `N:\\Users\\HP\\files`;
-  rootVideoFolder = './videos';
 
   // ignored = ['files/father', 'files/mother', 'files/Evgen', 'files/Igor', 'files/Eva', 'files/Vasya', 'files/Dina', 'files/grandfather', 'files/grandmother'];
   ignored = [`N:/Users/HP/files/father`, `N:/Users/HP/files/mother`, `N:/Users/HP/files/Evgen`, `N:/Users/HP/files/Igor`, `N:/Users/HP/files/Eva`, `N:/Users/HP/files/Vasya`, `N:/Users/HP/files/Dina`, `N:/Users/HP/files/grandfather`, `N:/Users/HP/files/grandmother`];
-  ignoredVideo = ['videos/father', 'videos/mother', 'videos/Evgen', 'videos/Igor', 'videos/Eva', 'videos/Vasya', 'videos/Dina', 'videos/grandfather', 'videos/grandmother'];
 
   constructor(
     @InjectModel('Gallery') private readonly gallery: Model<GalleryDocument>,
     @InjectModel('Chapter') private readonly chapter: Model<ChapterDocument>,
     @InjectModel('VideoChapter') private readonly videoChapter: Model<VideoChapterDocument>,
     @InjectModel('Video') private readonly video: Model<VideoDocument>,
+    @InjectModel('Doc') private readonly pdf: Model<DocDocument>,
   ) {}
 
   async onModuleInit(): Promise<void> {
     await this.seeFolder();
-    await this.seeVideoFolder();
-
-    this.videoWatcher.on('addDir', async(folder) => {
-
-      const prom = new Promise((res) => setTimeout(() => res(true), 60000));
-
-      await prom;
-
-      console.log('START_COPY__VIDEO__________________', folder)
-      const parentToId = new Map<string, string>();
-
-      let upperLevel = folder.replace(/\\/g, '/').replace(/^videos\//, '');
-      let parent: string;
-
-      if (upperLevel.includes("/")) {
-        let lastIndex = upperLevel.lastIndexOf("/");
-        parent = upperLevel.substring(0, lastIndex).split("/").pop();
-      }
-
-      let parentId: string;
-
-      if (parent) {
-        let hasValue = false;
-        for (const [key, value] of parentToId.entries()) {
-          if (value === parent) {
-            hasValue = true;
-            break;
-          }
-        }
-
-        const parentResp = await this.getVideoChapterByName(parent);
-
-        parentId = parentResp._id.toString();
-        parentToId.set(parent, parentId);
-      }
-
-      const createChapterUpperLevel: CreateChapterDto = {
-        title: upperLevel.replace(/^.*\//, ''),
-        readable_id: upperLevel.replace(/^.*\//, ''),
-        nameForUI: upperLevel.replace(/^.*\//, ''),
-        fullPath: upperLevel,
-        parent: parentId ? parentId : '',
-      }
-
-      try {
-        await this.createVideoChapterByFolder(createChapterUpperLevel);
-      } catch (e) {
-        console.error('created_____ERROR', e);
-      }
-
-      await this.getAllVideoFiles(folder);
-    });
 
     this.watcher.on('addDir', async (folder) => {
 
       const parentToId = new Map<string, string>();
 
-      // let upperLevel = folder.replace(/\\/g, '/').replace(/^files\//, '');
       let upperLevel = folder.replace(/\\/g, '/').replace(/^N:\/Users\/HP\/files\//, '');
 
-      console.log('UPPER___LEVEL_____', upperLevel)
       let parent: string;
 
       if (upperLevel.includes("/")) {
@@ -120,8 +66,13 @@ export class UploadPhotoService implements OnModuleInit {
           }
         }
 
-        console.log('PARENT_BY__TO__GET____', parent)
-        const parentResp = await this.getChapterByName(parent);
+        let parentResp;
+
+        try {
+          parentResp = await this.getChapterByName(parent);
+        } catch (e) {
+
+        }
 
         parentId = parentResp._id.toString();
         parentToId.set(parent, parentId);
@@ -135,11 +86,10 @@ export class UploadPhotoService implements OnModuleInit {
         parent: parentId ? parentId : '',
       }
 
-
       try {
         await this.createChapterByFolder(createChapterUpperLevel);
       } catch (e) {
-        console.error('created_____ERROR', e);
+        console.error('created', JSON.stringify(e));
       }
 
       setTimeout(async () => {
@@ -149,7 +99,6 @@ export class UploadPhotoService implements OnModuleInit {
     });
 
     this.watcher.on('ready', () => console.log('watching for changes'));
-    this.videoWatcher.on('ready', () => console.log('watching for video changes'));
   }
 
   private async seeFolder(): Promise<void> {
@@ -159,13 +108,6 @@ export class UploadPhotoService implements OnModuleInit {
         ignored: this.ignored.map(f => `${f}/**`),
         awaitWriteFinish: true
       }
-    );
-  }
-
-  private async seeVideoFolder(): Promise<void> {
-    this.videoWatcher = chokidarA.watch(
-      this.rootVideoFolder,
-      { ignoreInitial: true, ignored: this.ignoredVideo.map(f => `${f}/**`), awaitWriteFinish: true }
     );
   }
 
@@ -195,25 +137,19 @@ export class UploadPhotoService implements OnModuleInit {
   private async getAllFiles(folder) {
     let allFiles: string[];
 
-    console.log('FOLDER____', folder);
     try {
       allFiles = await fsProm.readdir(folder);
     } catch (e) {
       console.error('ERROR_WHILE_READ_DIR__', JSON.stringify(e));
     }
 
-    console.log('ALL_FILES___________:', allFiles);
     if (allFiles.length) {
-
 
       for (const fileOrFolder of allFiles) {
 
-        console.group(`start------${fileOrFolder}`)
         let metaInfo: Stats;
-        // const pathToFileOrFolder = path.join(folder, fileOrFolder).replace(/\\/g, "/").replace(/^files\//, '');
         const pathToFileOrFolder = path.join(folder, fileOrFolder).replace(/\\/g, "/").replace(/^N:\/Users\/HP\/files\//, '');
         const pathToFileOrFolderToCheck = path.join(folder, fileOrFolder).replace(/\\/g, "/");
-        console.log('PATH______________________________________', pathToFileOrFolder);
 
         try {
           metaInfo = await fsProm.stat(pathToFileOrFolderToCheck);
@@ -222,10 +158,17 @@ export class UploadPhotoService implements OnModuleInit {
         }
 
         const isDirectory = metaInfo.isDirectory();
-        console.log('IS_DIRECTORY____', isDirectory);
         if (!isDirectory) {
-          // const relativePath = path.relative(this.rootFolder, pathToFileOrFolder).replace(/\\/g, "/").replace(/^files\//, '');
-          console.log('Image______________:', pathToFileOrFolder);
+          const fileType = await fileTypeFromFile(`N:/Users/HP/files/${pathToFileOrFolder}`);
+
+          if (!fileType) {
+            continue;
+          }
+          const { mime } = fileType;
+
+          if (!mime.startsWith('image/') && !mime.startsWith('video/')) {
+            continue;
+          }
 
           let chapterName: string;
           let chapterId: string;
@@ -237,15 +180,14 @@ export class UploadPhotoService implements OnModuleInit {
             chapterName = pathToFileOrFolder;
           }
 
+          let chapter;
           try {
-            const chapter = await this.getChapterByName(chapterName);
-            console.log('CHAPTER__FOR__IMAGE____', chapter);
-            chapterId = chapter._id.toString();
+            chapter = await this.getChapterByName(chapterName);
           } catch (e) {
-
+            console.error('GET_CHAPTER__', JSON.stringify(e));
           }
 
-
+          chapterId = chapter._id.toString();
 
           let fullPath: string;
 
@@ -257,153 +199,51 @@ export class UploadPhotoService implements OnModuleInit {
             fullPath = pathToFileOrFolder;
           }
           let photoName = pathToFileOrFolder.replace(/^.*\//, '');
-          console.log('BEFORE____', photoName)
-          // photoName = Buffer.from(photoName, 'latin1').toString('utf8');
-          const createPhotoDTO: CreateUploadPhotoDto = {
+          const createMediaDTO: CreateUploadPhotoDto = {
             fullPath,
             title: pathToFileOrFolder.replace(/^.*\//, ''),
             name: photoName,
             chapter: chapterId
-
           }
-          let resp;
-          try {
-            resp = await this.uploadPhoto(createPhotoDTO);
-          } catch (e) {
 
+          let resp;
+
+          if (mime.startsWith('image/')) {
+            try {
+              resp = await this.uploadPhoto(createMediaDTO);
+            } catch (e) {
+
+            }
+          } else if (mime.startsWith('video/')) {
+            try {
+              resp = await this.uploadVideo(createMediaDTO);
+            } catch (e) {
+
+            }
           }
         }
-        console.groupEnd();
       }
     }
-  }
-
-  private async getAllVideoFiles(folder) {
-    console.log('GET__ALL__VIDEOS____CHAPTER__CREATE____', folder)
-    let allFiles: string[];
-
-    try {
-      allFiles = await fsProm.readdir(folder);
-      console.log('ALL_VIS+DEOSSS_________________', allFiles)
-    } catch (e) {
-      console.error('ERROR_WHILE_READ_VIDEO___DIR__', JSON.stringify(e));
-    }
-
-    if (allFiles.length) {
-      console.log('ALL_VIDEO____FILES___________:', allFiles);
-
-      for (const fileOrFolder of allFiles) {
-
-        console.group(`start------${fileOrFolder}`)
-        let metaInfo: Stats;
-        const pathToFileOrFolder = path.join(folder, fileOrFolder).replace(/\\/g, "/").replace(/^videos\//, '');
-        const pathToFileOrFolderToCheck = path.join(folder, fileOrFolder).replace(/\\/g, "/");
-        console.log('PATH__VIDEO____________________________________', pathToFileOrFolder);
-
-        try {
-          metaInfo = await fsProm.stat(pathToFileOrFolderToCheck);
-        } catch (e) {
-          console.error('ERROR_WHILE_GETTING_INFO_ABOUT_VIDEO_FOLDER/FILE', JSON.stringify(e));
-        }
-
-        const isDirectory = metaInfo.isDirectory();
-        console.log('IS_DIRECTORY____', isDirectory);
-        if (!isDirectory) {
-          // const relativePath = path.relative(this.rootFolder, pathToFileOrFolder).replace(/\\/g, "/").replace(/^files\//, '');
-          console.log('Image______________:', pathToFileOrFolder);
-
-          let chapterName: string;
-          let chapterId: string;
-
-          if (pathToFileOrFolder.includes("/")) {
-            let lastIndex = pathToFileOrFolder.lastIndexOf("/");
-            chapterName = pathToFileOrFolder.substring(0, lastIndex).split("/").pop();
-          } else {
-            chapterName = pathToFileOrFolder;
-          }
-
-          console.log('CHPTER__VIDEO___NAME____TO___CREATE___________', chapterName)
-
-          try {
-            const chapter = await this.getVideoChapterByName(chapterName);
-            console.log('CHAPTER__FOR__VIDEO____', chapter);
-            chapterId = chapter._id.toString();
-          } catch (e) {
-
-          }
-
-          let fullPath: string;
-
-          let lastIndex = pathToFileOrFolder.lastIndexOf("/");
-          if (lastIndex !== -1) {
-            fullPath = pathToFileOrFolder.substring(0, lastIndex);
-            console.log(fullPath);
-          } else {
-            fullPath = pathToFileOrFolder;
-          }
-          let photoName = pathToFileOrFolder.replace(/^.*\//, '');
-          console.log('BEFORE____', photoName)
-          // photoName = Buffer.from(photoName, 'latin1').toString('utf8');
-
-          const createVideoDTO: CreateVideoDto = {
-            fullPath,
-            title: pathToFileOrFolder.replace(/^.*\//, ''),
-            name: photoName,
-            chapter: chapterId
-
-          }
-          let resp;
-          try {
-            resp = await this.uploadVideo(createVideoDTO, photoName);
-          } catch (e) {
-
-          }
-        }
-        console.groupEnd();
-      }
-    }
-  }
-
-
-  async uploadPhoto(addPhotoDto: CreateUploadPhotoDto, fileName?: string) {
-    if (fileName) {
-      addPhotoDto.name = fileName;
-    }
-
-    console.log('PHOTO__TO___SAVE____', addPhotoDto);
-
-
-    const galleryE = new this.gallery(addPhotoDto);
-    const result = await galleryE.save();
-
-    return result;
   }
 
   async updateVideo(updatedDto: CreateVideoDto) {
     const video = await this.video.findById(updatedDto._id);
-    console.log('VIDEO___TO____UPDATE_______', video);
 
     if (!video) {
       console.log('NO___VIDEO_____________');
       throw new Error('Video not found_________');
     }
 
-    console.log('VIDEO__TO___SAVE____', updatedDto);
-    let result;
+    const isEqual = updatedDto.name === video.name;
 
     try {
-      const isEqual = updatedDto.name === video.name;
-      console.log('IS__NAME___EQUAL____', isEqual);
-
       if (!isEqual) {
         await fsProm.rename(`N:/Users/HP/files/${video.fullPath}/${video.name}`, `N:/Users/HP/files/${updatedDto.fullPath}/${updatedDto.name}`);
       }
-
-      result = await this.video.updateOne({ _id: updatedDto._id }, updatedDto).exec();
-
+      await this.video.updateOne({ _id: updatedDto._id }, updatedDto).exec();
 
     } catch (e) {
-      console.log('ERROR___WHILE___UPDATE______', JSON.stringify(e));
+      console.log('ERROR_UPDATE_', JSON.stringify(e));
     }
 
     return updatedDto;
@@ -412,84 +252,85 @@ export class UploadPhotoService implements OnModuleInit {
   async updatePhoto(updatedDto: CreateUploadPhotoDto) {
 
     const photo = await this.gallery.findById(updatedDto._id);
-    console.log('PHOTO_____________', photo);
     if (!photo) {
       console.log('NO___PHOTO_____________');
       throw new Error('Photo not found_________');
     }
-    console.log('PHOTO__TO___SAVE____', updatedDto);
 
-    let result;
+    const isEqual = updatedDto.name === photo.name;
+
     try {
-      // const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-      const extension = updatedDto.name.split('.').pop();
-      let nameWithoutExtension = this.removeExtension(updatedDto.name);
-
-      // updatedDto.name = `${nameWithoutExtension}-${uniqueSuffix}.${extension}`;
-      // updatedDto.name = `${nameWithoutExtension}.${extension}`;
-
-      const isEqual = updatedDto.name === photo.name;
-      console.log('IS__NAME___EQUAL____', isEqual);
-
       if (!isEqual) {
         await fsProm.rename(`N:/Users/HP/files/${photo.fullPath}/${photo.name}`, `N:/Users/HP/files/${updatedDto.fullPath}/${updatedDto.name}`);
       }
-      // await fsProm.rename(`files/${photo.fullPath}/${photo.name}`, `files/${updatedDto.fullPath}/${updatedDto.name}`);
-      // await fsProm.rename(`N:/Users/HP/files/${photo.fullPath}/${photo.name}`, `N:/Users/HP/files/${updatedDto.fullPath}/${updatedDto.name}`);
-
-      result = await this.gallery.updateOne({ _id: updatedDto._id }, updatedDto).exec();
-      console.log('RESULT___RENAMED_______________', result);
-
+      await this.gallery.updateOne({ _id: updatedDto._id }, updatedDto).exec();
     } catch (e) {
-      console.log('ERROR___WHILE___UPDATE______', JSON.stringify(e));
+      console.log('ERROR_UPDATE_', JSON.stringify(e));
     }
 
     return updatedDto;
   }
 
-  private removeExtension(imageString) {
-    const lastDotIndex = imageString.lastIndexOf('.');
-    if (lastDotIndex === -1) {
-      // If there's no dot in the string, return the original string
-      return imageString;
-    } else {
-      // Return the substring from the start of the string to the last dot
-      return imageString.substring(0, lastDotIndex);
+  async updatePdf(updatedDto: CreatePdfDto) {
+
+    const pdf = await this.pdf.findById(updatedDto._id);
+    if (!pdf) {
+      console.log('NO___PDF_____________');
+      throw new Error('Pdf not found_________');
     }
+
+    const isEqual = updatedDto.name === pdf.name;
+
+    try {
+      if (!isEqual) {
+        await fsProm.rename(`N:/Users/HP/files/${pdf.fullPath}/${pdf.name}`, `N:/Users/HP/files/${updatedDto.fullPath}/${updatedDto.name}`);
+      }
+      await this.pdf.updateOne({ _id: updatedDto._id }, updatedDto).exec();
+    } catch (e) {
+      console.log('ERROR_UPDATE_', JSON.stringify(e));
+    }
+
+    return updatedDto;
   }
 
-  async uploadVideo(addVideoDto: CreateVideoDto, fileName: string) {
-    addVideoDto.name = fileName;
-    console.log('VIDEO__TO___SAVE____', addVideoDto);
+  async uploadPhoto(addPhotoDto: CreateUploadPhotoDto, fileName?: string) {
+    console.log('PHOTO_TO_____', addPhotoDto);
+    if (fileName) {
+      addPhotoDto.name = fileName;
+    }
 
-    const vid = new this.video(addVideoDto);
-    const result = await vid.save();
+    const media = new this.gallery(addPhotoDto);
+    return await media.save();
+  }
 
-    return result;
+  async uploadVideo(addVideoDto: CreateVideoDto, fileName?: string) {
+    if (fileName) {
+      addVideoDto.name = fileName;
+    }
+
+    const media = new this.video(addVideoDto);
+    return await media.save();
+  }
+
+  async uploadDoc(addDocDto: CreatePdfDto, fileName?: string) {
+    if (fileName) {
+      addDocDto.name = fileName;
+    }
+
+    const media = new this.pdf(addDocDto);
+    console.log('PDF___ADDED___', media);
+    return await media.save();
   }
 
   async createChapterByFolder(createChapter: CreateChapterDto): Promise<Chapter> {
-    const galleryE = new this.chapter(createChapter);
-
-    console.log('BEFORE___CREATE________________', galleryE)
-    let newChapter;
-    try {
-      newChapter = await galleryE.save();
-    } catch (e) {
-      console.error('Unable create chapter!');
-    }
-
-    return newChapter;
-  }
-
-  async createVideoChapterByFolder(createChapter: CreateChapterDto): Promise<Chapter> {
-    const videoChapters = new this.videoChapter(createChapter);
+    const chapterObject = new this.chapter(createChapter);
 
     let newChapter;
     try {
-      newChapter = await videoChapters.save();
+      newChapter = await chapterObject.save();
     } catch (e) {
-      console.error('Unable create to video chapter!');
+      console.error('Unable create chapter!', JSON.stringify(e));
+      throw e;
     }
 
     return newChapter;
@@ -504,7 +345,6 @@ export class UploadPhotoService implements OnModuleInit {
       console.error('Unable create chapter!');
     }
 
-    //
     if (newChapter) {
       const { title } = newChapter;
       try {
@@ -520,7 +360,7 @@ export class UploadPhotoService implements OnModuleInit {
           }
         }
       } catch (e) {
-        console.error('ERROR__________________________', e);
+        console.error('ERROR______', JSON.stringify(e));
       }
     }
 
@@ -551,7 +391,7 @@ export class UploadPhotoService implements OnModuleInit {
           }
         }
       } catch (e) {
-        console.error('ERROR__________________________', e);
+        console.error('ERROR__________________________', JSON.stringify(e));
       }
     }
 
@@ -565,8 +405,6 @@ export class UploadPhotoService implements OnModuleInit {
     } catch (e) {
       console.error('CHAPTERS___ERROR_RR____', JSON.stringify(e));
     }
-
-    console.log('CHAPTERS__SUCCESS________', result);
 
     return result;
   }
@@ -582,21 +420,6 @@ export class UploadPhotoService implements OnModuleInit {
     return result;
   }
 
-  async getAllUpperLevelChapters() {
-    let result;
-    try {
-      result = await this.chapter.find({ parent: ''}).exec();
-      console.log('RES_AAA__________________', result)
-    } catch (e) {
-      console.error('CHAPTERS___ERROR_RR____', JSON.stringify(e));
-    }
-
-    // console.log('CHAPTERS__SUCCESS________', result);
-
-
-    return result;
-  }
-
   async getChapterByName(name: string): Promise<CreateChapterDto> {
     let result;
     try {
@@ -605,28 +428,7 @@ export class UploadPhotoService implements OnModuleInit {
       console.error('CHAPTERS___ERROR_RR____', JSON.stringify(e));
     }
 
-    console.log('CHAPTER__SUCCESS__BY____NAME______', result);
-
-
     return result[0];
-  }
-
-  async getVideoChapterByName(name: string): Promise<CreateChapterDto> {
-    let result;
-    try {
-      result = await this.videoChapter.find({ title: name }).exec();
-    } catch (e) {
-      console.error('CHAPTERS___ERROR_RR____', JSON.stringify(e));
-    }
-
-    console.log('CHAPTER__SUCCESS__BY____NAME______', result);
-
-
-    return result[0];
-  }
-
-  create(createUploadPhotoDto: CreateUploadPhotoDto) {
-    return 'This action adds a new uploadPhoto';
   }
 
   async findAll(chapter: string): Promise<Gallery[]> {
@@ -634,7 +436,6 @@ export class UploadPhotoService implements OnModuleInit {
 
     try {
       result = await this.gallery.find({ chapter }).exec();
-      console.log('ALL___RESULTTSS________', result)
     } catch (e) {
       console.error('ERROR____', e);
     }
@@ -646,11 +447,9 @@ export class UploadPhotoService implements OnModuleInit {
 
   async findAllVideos(chapter: string): Promise<Video[]> {
     let result;
-    console.log('CHAPTER_BY_TO_RECEIVE________________________', chapter)
 
     try {
       result = await this.video.find({ chapter }).exec();
-      console.log('ALL___RESULTTSS________', result)
     } catch (e) {
       console.error('ERROR____', e);
     }
@@ -658,71 +457,5 @@ export class UploadPhotoService implements OnModuleInit {
     return result.map((p) => {
       return p._doc;
     });
-  }
-
-  async findPhotosFiles(chapter) {
-    const result = await this.gallery.find({ chapter }).exec();
-
-    return result;
-  }
-
-
-  findOne(id: number) {
-    return `This action returns a #${id} uploadPhoto`;
-  }
-
-  update(id: number, updateUploadPhotoDto: UpdateUploadPhotoDto) {
-    return `This action updates a #${id} uploadPhoto`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} uploadPhoto`;
-  }
-
-  private async watchVideoFolder(folder) {
-
-    // console.log('START_COPY__VIDEO__________________', folder)
-    //   const parentToId = new Map<string, string>();
-    //
-    //   let upperLevel = folder.replace(/\\/g, '/').replace(/^videos\//, '');
-    //   let parent: string;
-    //
-    //   if (upperLevel.includes("/")) {
-    //     let lastIndex = upperLevel.lastIndexOf("/");
-    //     parent = upperLevel.substring(0, lastIndex).split("/").pop();
-    //   }
-    //
-    //   let parentId: string;
-    //
-    //   if (parent) {
-    //     let hasValue = false;
-    //     for (const [key, value] of parentToId.entries()) {
-    //       if (value === parent) {
-    //         hasValue = true;
-    //         break;
-    //       }
-    //     }
-    //
-    //     const parentResp = await this.getVideoChapterByName(parent);
-    //
-    //     parentId = parentResp._id.toString();
-    //     parentToId.set(parent, parentId);
-    //   }
-    //
-    //   const createChapterUpperLevel: CreateChapterDto = {
-    //     title: upperLevel.replace(/^.*\//, ''),
-    //     readable_id: upperLevel.replace(/^.*\//, ''),
-    //     nameForUI: upperLevel.replace(/^.*\//, ''),
-    //     fullPath: upperLevel,
-    //     parent: parentId ? parentId : '',
-    //   }
-    //
-    //   try {
-    //     const upperLevelChapter = await this.createVideoChapterByFolder(createChapterUpperLevel);
-    //   } catch (e) {
-    //     console.error('created_____ERROR', e);
-    //   }
-    //
-    //   await this.getAllVideoFiles(folder);
   }
 }
