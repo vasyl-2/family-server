@@ -170,6 +170,12 @@ export class UploadPhotoController {
   }
 
   @UseGuards(AuthPassportGuard)
+  @Get('pdflist/:chapter')
+  async findAllPdfs(@Param('chapter') chapter: string) {
+    return await this.uploadPhotoService.findAllDocs(chapter);
+  }
+
+  @UseGuards(AuthPassportGuard)
   @Get('videolist/:chapter')
   async findAllVideos(@Param('chapter') chapter: string) {
     return await this.uploadPhotoService.findAllVideos(chapter);

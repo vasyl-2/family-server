@@ -445,6 +445,20 @@ export class UploadPhotoService implements OnModuleInit {
     });
   }
 
+  async findAllDocs(chapter: string): Promise<Gallery[]> {
+    let result;
+
+    try {
+      result = await this.pdf.find({ chapter }).exec();
+    } catch (e) {
+      console.error('findAllDocs', JSON.stringify(e));
+    }
+
+    return result.map((p) => {
+      return p._doc;
+    });
+  }
+
   async findAllVideos(chapter: string): Promise<Video[]> {
     let result;
 
