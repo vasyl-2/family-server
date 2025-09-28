@@ -7,14 +7,13 @@ export type DocDocument = HydratedDocument<Doc>;
 export class Doc {
 
   @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Chapter' }] })
-
   chapter: mongoose.Schema.Types.ObjectId;
 
   @Prop()
   title?: string;
 
   @Prop()
-  description: string;
+  description?: string;
 
   @Prop()
   date?: Date;

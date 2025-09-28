@@ -313,6 +313,7 @@ export class UploadPhotoService implements OnModuleInit {
   }
 
   async uploadDoc(addDocDto: CreatePdfDto, fileName?: string) {
+    console.log('UPLOAD_DOC___', addDocDto);
     if (fileName) {
       addDocDto.name = fileName;
     }
@@ -450,6 +451,7 @@ export class UploadPhotoService implements OnModuleInit {
 
     try {
       result = await this.pdf.find({ chapter }).exec();
+      console.log('PDFS_FOUND__', result);
     } catch (e) {
       console.error('findAllDocs', JSON.stringify(e));
     }
