@@ -3,7 +3,7 @@ import { diskStorage } from 'multer';
 import { parse } from 'path';
 
 export const diskStorageOptions: MulterOptions = {
-  limits: { fileSize: 10 * 1024 * 1024 }, //10 MB
+  limits: { fileSize: 50 * 1024 * 1024 }, // 10 MB
   storage: diskStorage({
     destination: function (req, file, cb) {
       if (req.headers['chaptername']) {

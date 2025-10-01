@@ -12,12 +12,10 @@ import { CreateUploadPhotoDto } from './dto/create-upload-photo.dto';
 import { Gallery, GalleryDocument } from './gallery.schema';
 import { CreateChapterDto } from './dto/create-chapter';
 import { Chapter, ChapterDocument } from './chapter-schema';
-import { CreateVideoDto } from './dto/create-video.dto';
 import { VideoDocument } from './video-schema';
 import { Video } from './video-schema';
 import { VideoChapterDocument } from './video-chapter-schema';
 import { fileTypeFromFile } from 'file-type';
-import { CreatePdfDto } from './dto/create-pdf.dto';
 import { DocDocument } from './doc.schema';
 
 @Injectable()
@@ -226,7 +224,7 @@ export class UploadPhotoService implements OnModuleInit {
     }
   }
 
-  async updateVideo(updatedDto: CreateVideoDto) {
+  async updateVideo(updatedDto: CreateUploadPhotoDto) {
     const video = await this.video.findById(updatedDto._id);
 
     if (!video) {
@@ -271,7 +269,7 @@ export class UploadPhotoService implements OnModuleInit {
     return updatedDto;
   }
 
-  async updatePdf(updatedDto: CreatePdfDto) {
+  async updatePdf(updatedDto: CreateUploadPhotoDto) {
 
     const pdf = await this.pdf.findById(updatedDto._id);
     if (!pdf) {
@@ -293,8 +291,9 @@ export class UploadPhotoService implements OnModuleInit {
     return updatedDto;
   }
 
+  // upload
+
   async uploadPhoto(addPhotoDto: CreateUploadPhotoDto, fileName?: string) {
-    console.log('PHOTO_TO_____', addPhotoDto);
     if (fileName) {
       addPhotoDto.name = fileName;
     }
@@ -303,7 +302,7 @@ export class UploadPhotoService implements OnModuleInit {
     return await media.save();
   }
 
-  async uploadVideo(addVideoDto: CreateVideoDto, fileName?: string) {
+  async uploadVideo(addVideoDto: CreateUploadPhotoDto, fileName?: string) {
     if (fileName) {
       addVideoDto.name = fileName;
     }
@@ -312,14 +311,12 @@ export class UploadPhotoService implements OnModuleInit {
     return await media.save();
   }
 
-  async uploadDoc(addDocDto: CreatePdfDto, fileName?: string) {
-    console.log('UPLOAD_DOC___', addDocDto);
+  async uploadDoc(addDocDto: CreateUploadPhotoDto, fileName?: string) {
     if (fileName) {
       addDocDto.name = fileName;
     }
 
     const media = new this.pdf(addDocDto);
-    console.log('PDF___ADDED___', media);
     return await media.save();
   }
 

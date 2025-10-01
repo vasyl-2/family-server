@@ -6,7 +6,11 @@ import {
   Patch,
   Param,
   UseInterceptors,
-  UploadedFile, ParseFilePipe, UseGuards, StreamableFile, Header,
+  UploadedFile,
+  ParseFilePipe,
+  UseGuards,
+  StreamableFile,
+  Header,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { join } from 'path';
@@ -16,11 +20,9 @@ import { CreateUploadPhotoDto } from './dto/create-upload-photo.dto';
 import { CreateChapterDto } from './dto/create-chapter';
 import { AuthPassportGuard } from '../auth/auth-passport.guard';
 import { createReadStream } from 'fs';
-import { CreateVideoDto } from './dto/create-video.dto';
 import { Permissions } from '../auth/decorators/permissions.decorator';
 import { PermissionGuard } from '../auth/guards/permission.guard';
 import { diskStorageOptions } from '../disk-storage-options';
-import { CreatePdfDto } from './dto/create-pdf.dto';
 
 @Controller('upload-photo')
 export class UploadPhotoController {
@@ -56,7 +58,7 @@ export class UploadPhotoController {
   @Post('uploadvideo')
   @UseInterceptors(FileInterceptor('video', diskStorageOptions))
   async uploadVideo(
-    @Body() body: CreateVideoDto,
+    @Body() body: CreateUploadPhotoDto,
     @UploadedFile(
       new ParseFilePipe({
         validators: [
@@ -80,9 +82,9 @@ export class UploadPhotoController {
   }
 
   @Post('uploadpdf')
-  @UseInterceptors(FileInterceptor('doc', diskStorageOptions))
+  @UseInterceptors(FileInterceptor('pdf', diskStorageOptions))
   async uploadDoc(
-    @Body() body: CreatePdfDto,
+    @Body() body: CreateUploadPhotoDto,
     @UploadedFile(
       new ParseFilePipe({
         validators: [

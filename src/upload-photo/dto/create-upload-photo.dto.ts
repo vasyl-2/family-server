@@ -6,5 +6,6 @@ export class CreateUploadPhotoDto {
   name?: string;
   fullPath?: string;
   date?: Date;
+  type?: 'photo' | 'video' | 'pdf';
 }
 

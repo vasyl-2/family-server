@@ -30,6 +30,9 @@ export class Gallery {
 
   @Prop()
   fullPath?: string;
+
+  @Prop()
+  type?: 'photo' | 'video' | 'pdf';
 }
 
 export const GallerySchema = SchemaFactory.createForClass(Gallery);

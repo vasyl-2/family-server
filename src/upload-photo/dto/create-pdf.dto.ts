@@ -1,9 +1,0 @@
-export class CreatePdfDto {
-  _id?: string;
-  title: string;
-  description?: string;
-  chapter?: string;
-  name?: string;
-  fullPath?: string;
-  date?: Date;
-}
