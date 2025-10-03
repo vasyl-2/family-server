@@ -15,7 +15,6 @@ export class RoleService implements RoleServiceInterface {
   }
 
   async createRole(role: RoleDto): Promise<RoleDto> {
-    console.log('NEW___ROLE_____', role);
     let createdRole;
     let createdRoleTOAdd;
     try {

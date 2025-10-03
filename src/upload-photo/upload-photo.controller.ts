@@ -117,14 +117,6 @@ export class UploadPhotoController {
     return await this.uploadPhotoService.getAllChapters();
   }
 
-  // @UseGuards(AuthGuard)
-  @Permissions(['see_all', 'edit_user'])
-  @UseGuards(AuthPassportGuard, PermissionGuard)
-  @Get('video-chapters')
-  async getVideoChapters() {
-    return this.uploadPhotoService.getAllVideoChapters()
-  }
-
   @Post('createchapter')
   async createChapter(@Body() chapter: CreateChapterDto) {
 
@@ -144,18 +136,6 @@ export class UploadPhotoController {
 
     return result;
   }
-
-  @Post('createvideochapter')
-  async createVideoChapter(@Body() chapter: CreateChapterDto) {
-    try {
-      await this.uploadPhotoService.createVideoChapter(chapter);
-    } catch (e) {
-
-    }
-
-    return await this.uploadPhotoService.getAllVideoChapters();
-  }
-
 
   @UseGuards(AuthPassportGuard)
   @Get('photos/:chapter')

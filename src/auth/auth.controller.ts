@@ -46,6 +46,8 @@ export class AuthController {
   ) {
     let user;
 
+    console.log('creds__________', creds);
+
     try {
       user = await this.authService.signIn({ email: creds.email, password: creds.password });
     } catch (e) {

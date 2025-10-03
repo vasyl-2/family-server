@@ -1,12 +1,14 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import * as fs from 'fs';
+// import * as fs from 'fs';
 import * as fsProm from 'fs/promises';
-import * as chokidarA from 'chokidar'
+// import * as chokidarA from 'chokidar'
+import { WatchOptions, watch } from 'chokidar';
 import * as path from 'path';
-import { FSWatcher } from 'fs';
-import { Stats } from 'node:fs';
+// import { FSWatcher } from 'fs';
+import { Stats, FSWatcher, existsSync, mkdirSync } from 'node:fs';
+import { fileTypeFromFile } from 'file-type';
 
 import { CreateUploadPhotoDto } from './dto/create-upload-photo.dto';
 import { Gallery, GalleryDocument } from './gallery.schema';
@@ -14,52 +16,71 @@ import { CreateChapterDto } from './dto/create-chapter';
 import { Chapter, ChapterDocument } from './chapter-schema';
 import { VideoDocument } from './video-schema';
 import { Video } from './video-schema';
-import { VideoChapterDocument } from './video-chapter-schema';
-import { fileTypeFromFile } from 'file-type';
 import { DocDocument } from './doc.schema';
+
 
 @Injectable()
 export class UploadPhotoService implements OnModuleInit {
 
-  watcher: FSWatcher;
+  private watcher: FSWatcher;
 
-  // rootFolder = './files';
-  rootFolder =  `N:\\Users\\HP\\files`;
+  // rootFolder = 'files';
+  private rootFolder = process.env.FILE_PATH;
+  // rootFolder =  `N:\\Users\\HP\\files`;
 
-  // ignored = ['files/father', 'files/mother', 'files/Evgen', 'files/Igor', 'files/Eva', 'files/Vasya', 'files/Dina', 'files/grandfather', 'files/grandmother'];
-  ignored = [`N:/Users/HP/files/father`, `N:/Users/HP/files/mother`, `N:/Users/HP/files/Evgen`, `N:/Users/HP/files/Igor`, `N:/Users/HP/files/Eva`, `N:/Users/HP/files/Vasya`, `N:/Users/HP/files/Dina`, `N:/Users/HP/files/grandfather`, `N:/Users/HP/files/grandmother`];
+  private ignored = [
+    `${process.env.FILE_PATH_ROW}/father`,
+    `${process.env.FILE_PATH_ROW}/mother`,
+    `${process.env.FILE_PATH_ROW}/Evgen`,
+    `${process.env.FILE_PATH_ROW}/Igor`,
+    `${process.env.FILE_PATH_ROW}/Eva`,
+    `${process.env.FILE_PATH_ROW}/Vasya`,
+    `${process.env.FILE_PATH_ROW}/Dina`,
+    `${process.env.FILE_PATH_ROW}/grandfather`,
+    `${process.env.FILE_PATH_ROW}/grandmother`,
+  ];
+  // ignored = [`N:/Users/HP/files/father`, `N:/Users/HP/files/mother`, `N:/Users/HP/files/Evgen`, `N:/Users/HP/files/Igor`, `N:/Users/HP/files/Eva`, `N:/Users/HP/files/Vasya`, `N:/Users/HP/files/Dina`, `N:/Users/HP/files/grandfather`, `N:/Users/HP/files/grandmother`];
 
   constructor(
     @InjectModel('Gallery') private readonly gallery: Model<GalleryDocument>,
     @InjectModel('Chapter') private readonly chapter: Model<ChapterDocument>,
-    @InjectModel('VideoChapter') private readonly videoChapter: Model<VideoChapterDocument>,
     @InjectModel('Video') private readonly video: Model<VideoDocument>,
     @InjectModel('Doc') private readonly pdf: Model<DocDocument>,
   ) {}
 
   async onModuleInit(): Promise<void> {
     await this.seeFolder();
+    console.log('ROOTFOLDER!!!', this.rootFolder);
+    console.log('PWD', process.env.PWD);
 
     this.watcher.on('addDir', async (folder) => {
 
+      console.log('FOLDER____', folder);
+
       const parentToId = new Map<string, string>();
 
-      let upperLevel = folder.replace(/\\/g, '/').replace(/^N:\/Users\/HP\/files\//, '');
+      let upperLevel: string;
+
+      if (process.env.FILE_PATH.includes('/usr/src/app/files')) {
+        upperLevel = folder.replace(/^\/usr\/src\/app\/files\//, '');
+      } else {
+        upperLevel = folder
+          .replace(/\\/g, '/')
+          .replace(/^N:\/Users\/HP\/files\//, '');
+      }
 
       let parent: string;
 
-      if (upperLevel.includes("/")) {
-        let lastIndex = upperLevel.lastIndexOf("/");
-        parent = upperLevel.substring(0, lastIndex).split("/").pop();
+      if (upperLevel.includes('/')) {
+        const lastIndex = upperLevel.lastIndexOf('/');
+        parent = upperLevel.substring(0, lastIndex).split('/').pop();
       }
 
       let parentId: string;
 
       if (parent) {
-        let hasValue = false;
         for (const [key, value] of parentToId.entries()) {
           if (value === parent) {
-            hasValue = true;
             break;
           }
         }
@@ -99,18 +120,32 @@ export class UploadPhotoService implements OnModuleInit {
     this.watcher.on('ready', () => console.log('watching for changes'));
   }
 
+  private getConfigForWatcher(): WatchOptions {
+    return process.env.FILE_PATH.includes('/usr/src/app/files') ? {
+      ignoreInitial: true,
+      ignored: this.ignored.map((f) => `${f}/**`),
+      awaitWriteFinish: true,
+    } : {
+      ignoreInitial: true,
+      ignored: this.ignored.map((f) => `${f}/**`),
+      awaitWriteFinish: true,
+      persistent: true,
+      usePolling: true,
+      interval: 100,
+      binaryInterval: 300,
+    }
+  }
   private async seeFolder(): Promise<void> {
-    this.watcher = chokidarA.watch(
-      this.rootFolder,
-      { ignoreInitial: true,
-        ignored: this.ignored.map(f => `${f}/**`),
-        awaitWriteFinish: true
-      }
-    );
+    this.watcher = watch(this.rootFolder, this.getConfigForWatcher());
   }
 
-  private replaceUkrainianLettersWithEnglish(string: string, mapping: string): string {
-    const ukrLetters: string[] = Object.values(mapping).map((letter: string) => letter.toLowerCase());
+  private replaceUkrainianLettersWithEnglish(
+    string: string,
+    mapping: string,
+  ): string {
+    const ukrLetters: string[] = Object.values(mapping).map((letter: string) =>
+      letter.toLowerCase(),
+    );
     const englishLetters: string[] = Object.keys(mapping);
 
     let result = '';
@@ -137,6 +172,7 @@ export class UploadPhotoService implements OnModuleInit {
 
     try {
       allFiles = await fsProm.readdir(folder);
+      console.log('allFiles', allFiles);
     } catch (e) {
       console.error('ERROR_WHILE_READ_DIR__', JSON.stringify(e));
     }
@@ -146,18 +182,40 @@ export class UploadPhotoService implements OnModuleInit {
       for (const fileOrFolder of allFiles) {
 
         let metaInfo: Stats;
-        const pathToFileOrFolder = path.join(folder, fileOrFolder).replace(/\\/g, "/").replace(/^N:\/Users\/HP\/files\//, '');
-        const pathToFileOrFolderToCheck = path.join(folder, fileOrFolder).replace(/\\/g, "/");
+        let pathToFileOrFolder = path.join(folder, fileOrFolder);
+        let pathToFileOrFolderToCheck = path.join(folder, fileOrFolder)
+
+        if (process.env.FILE_PATH.includes('/usr/src/app/files')) {
+          pathToFileOrFolder = pathToFileOrFolder.replace(
+            /^\/usr\/src\/app\/files\//,
+            '',
+          );
+        } else {
+          pathToFileOrFolder = pathToFileOrFolder
+            .replace(/\\/g, '/')
+            .replace(/^N:\/Users\/HP\/files\//, '');
+
+          pathToFileOrFolderToCheck = pathToFileOrFolderToCheck.replace(
+            /\\/g,
+            '/',
+          );
+        }
 
         try {
           metaInfo = await fsProm.stat(pathToFileOrFolderToCheck);
         } catch (e) {
-          console.error('ERROR_WHILE_GETTING_INFO_ABOUT_FOLDER/FILE', JSON.stringify(e));
+          console.error(
+            'ERROR_WHILE_GETTING_INFO_ABOUT_FOLDER/FILE',
+            JSON.stringify(e),
+          );
         }
 
         const isDirectory = metaInfo.isDirectory();
         if (!isDirectory) {
-          const fileType = await fileTypeFromFile(`N:/Users/HP/files/${pathToFileOrFolder}`);
+          // const fileType = await fileTypeFromFile(`N:/Users/HP/files/${pathToFileOrFolder}`);
+          const fileType = await fileTypeFromFile(
+            `${process.env.FILE_PATH_ROW}/${pathToFileOrFolder}`,
+          );
 
           if (!fileType) {
             continue;
@@ -189,14 +247,14 @@ export class UploadPhotoService implements OnModuleInit {
 
           let fullPath: string;
 
-          let lastIndex = pathToFileOrFolder.lastIndexOf("/");
+          const lastIndex = pathToFileOrFolder.lastIndexOf('/');
           if (lastIndex !== -1) {
             fullPath = pathToFileOrFolder.substring(0, lastIndex);
             console.log(fullPath);
           } else {
             fullPath = pathToFileOrFolder;
           }
-          let photoName = pathToFileOrFolder.replace(/^.*\//, '');
+          const photoName = pathToFileOrFolder.replace(/^.*\//, '');
           const createMediaDTO: CreateUploadPhotoDto = {
             fullPath,
             title: pathToFileOrFolder.replace(/^.*\//, ''),
@@ -236,7 +294,11 @@ export class UploadPhotoService implements OnModuleInit {
 
     try {
       if (!isEqual) {
-        await fsProm.rename(`N:/Users/HP/files/${video.fullPath}/${video.name}`, `N:/Users/HP/files/${updatedDto.fullPath}/${updatedDto.name}`);
+        // await fsProm.rename(`N:/Users/HP/files/${video.fullPath}/${video.name}`, `N:/Users/HP/files/${updatedDto.fullPath}/${updatedDto.name}`);
+        await fsProm.rename(
+          `${process.env.FILE_PATH_ROW}/${video.fullPath}/${video.name}`,
+          `${process.env.FILE_PATH_ROW}/${updatedDto.fullPath}/${updatedDto.name}`,
+        );
       }
       await this.video.updateOne({ _id: updatedDto._id }, updatedDto).exec();
 
@@ -259,7 +321,11 @@ export class UploadPhotoService implements OnModuleInit {
 
     try {
       if (!isEqual) {
-        await fsProm.rename(`N:/Users/HP/files/${photo.fullPath}/${photo.name}`, `N:/Users/HP/files/${updatedDto.fullPath}/${updatedDto.name}`);
+        // await fsProm.rename(`N:/Users/HP/files/${photo.fullPath}/${photo.name}`, `N:/Users/HP/files/${updatedDto.fullPath}/${updatedDto.name}`);
+        await fsProm.rename(
+          `${process.env.FILE_PATH_ROW}/${photo.fullPath}/${photo.name}`,
+          `${process.env.FILE_PATH_ROW}/${updatedDto.fullPath}/${updatedDto.name}`,
+        );
       }
       await this.gallery.updateOne({ _id: updatedDto._id }, updatedDto).exec();
     } catch (e) {
@@ -281,7 +347,11 @@ export class UploadPhotoService implements OnModuleInit {
 
     try {
       if (!isEqual) {
-        await fsProm.rename(`N:/Users/HP/files/${pdf.fullPath}/${pdf.name}`, `N:/Users/HP/files/${updatedDto.fullPath}/${updatedDto.name}`);
+        // await fsProm.rename(`N:/Users/HP/files/${pdf.fullPath}/${pdf.name}`, `N:/Users/HP/files/${updatedDto.fullPath}/${updatedDto.name}`);
+        await fsProm.rename(
+          `${process.env.FILE_PATH_ROW}/${pdf.fullPath}/${pdf.name}`,
+          `${process.env.FILE_PATH_ROW}/${updatedDto.fullPath}/${updatedDto.name}`,
+        );
       }
       await this.pdf.updateOne({ _id: updatedDto._id }, updatedDto).exec();
     } catch (e) {
@@ -320,7 +390,9 @@ export class UploadPhotoService implements OnModuleInit {
     return await media.save();
   }
 
-  async createChapterByFolder(createChapter: CreateChapterDto): Promise<Chapter> {
+  async createChapterByFolder(
+    createChapter: CreateChapterDto,
+  ): Promise<Chapter> {
     const chapterObject = new this.chapter(createChapter);
 
     let newChapter;
@@ -348,48 +420,21 @@ export class UploadPhotoService implements OnModuleInit {
       try {
         if (newChapter.parent) {
           const { fullPath } = newChapter;
-          if (!fs.existsSync(`N:/Users/HP/files/${fullPath}`)){
-            fs.mkdirSync(`N:/Users/HP/files/${fullPath}`);
+          if (!existsSync(`${process.env.FILE_PATH_ROW}/${fullPath}`)){
+            mkdirSync(`${process.env.FILE_PATH_ROW}/${fullPath}`);
           }
+          // if (!existsSync(`N:/Users/HP/files/${fullPath}`)){
+          //   mkdirSync(`N:/Users/HP/files/${fullPath}`);
+          // }
         } else {
-          if (!fs.existsSync(`${title}`)){
-            fs.mkdirSync(`N:/Users/HP/files/${title}`);
+          if (!existsSync(`${title}`)){
+            // mkdirSync(`N:/Users/HP/files/${title}`);
+            mkdirSync(`${process.env.FILE_PATH_ROW}/${title}`);
             // this.watcher.removeListener()
           }
         }
       } catch (e) {
         console.error('ERROR______', JSON.stringify(e));
-      }
-    }
-
-    return newChapter;
-  }
-
-  async createVideoChapter(createChapter: CreateChapterDto) {
-    const videoChapters = new this.videoChapter(createChapter);
-    let newChapter;
-    try {
-      newChapter = await videoChapters.save();
-    } catch (e) {
-      console.error('Unable to create video chapter!');
-    }
-
-    if (newChapter) {
-      const { title } = newChapter;
-      try {
-        if (newChapter.parent) {
-          const { fullPath } = newChapter;
-          if (!fs.existsSync(`N:/Users/HP/files/videos/${fullPath}`)){
-            fs.mkdirSync(`N:/Users/HP/files/videos/${fullPath}`);
-          }
-        } else {
-          if (!fs.existsSync(`${title}`)){
-            fs.mkdirSync(`N:/Users/HP/files/videos/${title}`);
-            // this.watcher.removeListener()
-          }
-        }
-      } catch (e) {
-        console.error('ERROR__________________________', JSON.stringify(e));
       }
     }
 
@@ -402,17 +447,6 @@ export class UploadPhotoService implements OnModuleInit {
       result = await this.chapter.find().exec();
     } catch (e) {
       console.error('CHAPTERS___ERROR_RR____', JSON.stringify(e));
-    }
-
-    return result;
-  }
-
-  async getAllVideoChapters() {
-    let result;
-    try {
-      result = await this.videoChapter.find().exec();
-    } catch (e) {
-      console.error('VIDEO_CHAPTERS___ERROR____', JSON.stringify(e));
     }
 
     return result;
