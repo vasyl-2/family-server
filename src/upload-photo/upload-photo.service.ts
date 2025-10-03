@@ -1,13 +1,10 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-// import * as fs from 'fs';
 import * as fsProm from 'fs/promises';
-// import * as chokidarA from 'chokidar'
-import { WatchOptions, watch } from 'chokidar';
+import { watch, ChokidarOptions, FSWatcher } from 'chokidar';
 import * as path from 'path';
-// import { FSWatcher } from 'fs';
-import { Stats, FSWatcher, existsSync, mkdirSync } from 'node:fs';
+import { Stats, existsSync, mkdirSync } from 'node:fs';
 import { fileTypeFromFile } from 'file-type';
 
 import { CreateUploadPhotoDto } from './dto/create-upload-photo.dto';
@@ -120,7 +117,7 @@ export class UploadPhotoService implements OnModuleInit {
     this.watcher.on('ready', () => console.log('watching for changes'));
   }
 
-  private getConfigForWatcher(): WatchOptions {
+  private getConfigForWatcher(): ChokidarOptions {
     return process.env.FILE_PATH.includes('/usr/src/app/files') ? {
       ignoreInitial: true,
       ignored: this.ignored.map((f) => `${f}/**`),
