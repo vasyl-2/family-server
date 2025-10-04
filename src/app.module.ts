@@ -31,8 +31,8 @@ const mongoUri = process.env.MONGO_URI
     // }),
 
     ServeStaticModule.forRoot({
-      //rootPath: join('N:', 'Users', 'HP', 'files'), // Using join with path segments for usual server
-      rootPath: join('/usr/src/app', 'files'), // Using join with path segments for k8s
+      rootPath: join('N:', 'Users', 'HP', 'files'), // Using join with path segments for usual server
+      // rootPath: join('/usr/src/app', 'files'), // Using join with path segments for k8s
       serveRoot: '/static-api/family-back',
       // renderPath: '/files',
       // rootPath: join(__dirname, '..', 'files'),
