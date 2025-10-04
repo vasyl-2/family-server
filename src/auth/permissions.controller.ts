@@ -16,7 +16,6 @@ export class PermissionsController implements PermissionsServiceInterface {
   @Get('user')
   async getPermissionsByUser(@Headers('authorization') authorizationString: string): Promise<PermissionDto[]> {
 
-    console.log('START_____________1', authorizationString.split(' ')[1]);
     const user: string = authorizationString.split(' ')[1];
 
     const { role = undefined }: { role: string[] | undefined } = JSON.parse(atob(user.split('.')[1]));
@@ -24,7 +23,6 @@ export class PermissionsController implements PermissionsServiceInterface {
     if (!role) {
       return []; // @TODO refactor
     }
-    console.log('PARSED___USER_____', role);
 
     let permissions: PermissionDto[];
 
@@ -33,7 +31,6 @@ export class PermissionsController implements PermissionsServiceInterface {
     } catch (e) {
       console.error('get permissions by user error:', JSON.stringify(e));
     }
-    console.log('PERMISSIONS___BY__USER_________:  ', permissions);
     return permissions;
   }
 
@@ -81,7 +78,6 @@ export class PermissionsController implements PermissionsServiceInterface {
   @Get()
   async getPermissions(): Promise<PermissionDto[]> {
 
-    console.log('START_____________');
     let permissions: PermissionDto[];
 
     try {

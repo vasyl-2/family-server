@@ -18,7 +18,7 @@ export class Video {
   type?: string; // mp4 ....TODO!!!!!!
 
   @Prop()
-  description: string;
+  description?: string;
 
   @Prop()
   name: string;

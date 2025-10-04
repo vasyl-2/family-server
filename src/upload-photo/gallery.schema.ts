@@ -12,15 +12,15 @@ export class Gallery {
   // _id?: string;
 
   @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Chapter' }] })
+  chapter: mongoose.Schema.Types.ObjectId;
   // chapter: Chapter;
   // chapter: { type: mongoose.Schema.Types.ObjectId, ref: 'Chapter' };
-  chapter: mongoose.Schema.Types.ObjectId;
 
   @Prop()
   title?: string;
 
   @Prop()
-  description: string;
+  description?: string;
 
   @Prop()
   date?: Date;
@@ -30,6 +30,9 @@ export class Gallery {
 
   @Prop()
   fullPath?: string;
+
+  @Prop()
+  type?: 'photo' | 'video' | 'pdf';
 }
 
 export const GallerySchema = SchemaFactory.createForClass(Gallery);

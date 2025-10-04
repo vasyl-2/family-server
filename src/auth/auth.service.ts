@@ -43,11 +43,21 @@ export class AuthService {
     }
   }
 
-  async signIn(creds: { email: string; password: string; } ): Promise<{ access_token: string; } | null> {
-
+  async signIn(creds: {
+    email: string;
+    password: string;
+  }): Promise<{ access_token: string } | null> {
     const resp = await this.auth.findOne({ email: creds.email }).exec();
-    const isPasswordCorrect = await bcrypt.compare(creds.password, resp.password);
+    
+    if (!resp) {
+      console.error('Incorrect user!', creds.email);
+    }
 
+    const isPasswordCorrect = await bcrypt.compare(
+      creds.password,
+      resp.password
+    );
+    
     if (!isPasswordCorrect) {
       throw new UnauthorizedException();
     }
@@ -57,14 +67,20 @@ export class AuthService {
     let permissions: PermissionDto[];
 
     try {
-      permissions = await this.permissionService.getPermissionsByRolesIds(roleIds);
+      permissions =
+        await this.permissionService.getPermissionsByRolesIds(roleIds);
     } catch (err) {
       console.error('ROLES_ERROR_______', JSON.stringify(err));
     }
 
-    const permissionIds = permissions.map(p => p._id.toString());
+    const permissionIds = permissions.map((p) => p._id.toString());
 
-    const payload = { sub: resp._id, email: resp.email, role: resp.role, permissions: permissionIds };
+    const payload = {
+      sub: resp._id,
+      email: resp.email,
+      role: resp.role,
+      permissions: permissionIds,
+    };
 
     let access_token;
 
@@ -77,13 +93,14 @@ export class AuthService {
     return { access_token };
   }
 
-  async validateUser(id :string): Promise<{ }> {
+  async validateUser(id: string): Promise<{ }> {
     const resp = await this.auth.findById(id).exec();
 
     if (!resp) {
       throw new UnauthorizedException();
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...rest } = resp;
     return rest;
   }

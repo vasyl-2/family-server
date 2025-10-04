@@ -10,7 +10,8 @@ import { AppService } from './app.service';
 import { UploadPhotoModule } from './upload-photo/upload-photo.module';
 import { AuthModule } from './auth/auth.module';
 
-const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/gallery'; // localhost
+// const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/gallery'; // localhost
+const mongoUri = process.env.MONGO_URI
 @Module({
   imports: [
     UploadPhotoModule,

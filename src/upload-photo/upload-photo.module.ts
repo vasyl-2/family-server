@@ -9,15 +9,18 @@ import { Chapter, ChapterSchema } from './chapter-schema';
 import { PhotoValidatorService } from './photo-validator/photo-validator.service';
 import { AuthModule } from '../auth/auth.module';
 import { Video, VideoSchema } from './video-schema';
-import { VideoChapter, VideoChapterSchema } from './video-chapter-schema';
-import { PermissionGuard } from '../auth/guards/permission.guard';
+import { Doc, DocSchema } from './doc.schema';
+
+const mongooseSchemas = [
+  MongooseModule.forFeature([{ name: Gallery.name, schema: GallerySchema }]),
+  MongooseModule.forFeature([{ name: Chapter.name, schema: ChapterSchema }]),
+  MongooseModule.forFeature([{ name: Video.name, schema: VideoSchema }]),
+  MongooseModule.forFeature([{ name: Doc.name, schema: DocSchema }]),
+];
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: Gallery.name, schema: GallerySchema }]),
-    MongooseModule.forFeature([{ name: Chapter.name, schema: ChapterSchema }]),
-    MongooseModule.forFeature([{ name: VideoChapter.name, schema: VideoChapterSchema }]),
-    MongooseModule.forFeature([{ name: Video.name, schema: VideoSchema }]),
+    ...mongooseSchemas,
     JwtModule,
     AuthModule
   ],

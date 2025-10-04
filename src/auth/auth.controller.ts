@@ -44,15 +44,17 @@ export class AuthController {
   async authenticate(
     @Body() creds: { email: string; password: string; }
   ) {
+    let user;
+
+    console.log('creds__________', creds);
 
     try {
-      const user = await this.authService.signIn({ email: creds.email, password: creds.password });
-
-      console.log('USER_FOUND_____', user);
-
-      return user;
+      user = await this.authService.signIn({ email: creds.email, password: creds.password });
     } catch (e) {
-      console.error('НЕМОЖЛИВО ОТРИМАТИ КОРИСТУВАЧА', e);
+      console.error('incorrect password / user', e);
+      throw e;
     }
+
+    return user;
   }
 }

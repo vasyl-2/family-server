@@ -10,7 +10,8 @@ import { PermissionsServiceInterface } from './models/permissions.service.interf
 export class PermissionsService implements PermissionsServiceInterface {
 
   constructor(
-    @InjectModel('Permissions') private readonly permissions: Model<PermissionsDocument>
+    @InjectModel('Permissions')
+    private readonly permissions: Model<PermissionsDocument>,
   ) {
   }
 
@@ -23,8 +24,11 @@ export class PermissionsService implements PermissionsServiceInterface {
           $in: rolesIds
         }
       })
-    } catch(err) {
-      console.error('during receiving permissions by role id', JSON.stringify(err));
+    } catch (err) {
+      console.error(
+        'during receiving permissions by role id',
+        JSON.stringify(err),
+      );
     }
 
     return permissions;
@@ -47,8 +51,8 @@ export class PermissionsService implements PermissionsServiceInterface {
 
     try {
       permissions = await this.permissions.find();
-    } catch(err) {
-
+    } catch (err) {
+      console.log(err);
     }
 
     return permissions;
