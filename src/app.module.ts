@@ -10,7 +10,8 @@ import { AppService } from './app.service';
 import { UploadPhotoModule } from './upload-photo/upload-photo.module';
 import { AuthModule } from './auth/auth.module';
 
-const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/gallery'; // localhost
+// const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/gallery'; // localhost
+const mongoUri = process.env.MONGO_URI
 @Module({
   imports: [
     UploadPhotoModule,
@@ -30,8 +31,8 @@ const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/gallery'; /
     // }),
 
     ServeStaticModule.forRoot({
-      rootPath: join('N:', 'Users', 'HP', 'files'), // Using join with path segments for usual server
-      // rootPath: join('/usr/src/app', 'files'), // Using join with path segments for k8s
+      //rootPath: join('N:', 'Users', 'HP', 'files'), // Using join with path segments for usual server
+      rootPath: join('/usr/src/app', 'files'), // Using join with path segments for k8s
       serveRoot: '/static-api/family-back',
       // renderPath: '/files',
       // rootPath: join(__dirname, '..', 'files'),
