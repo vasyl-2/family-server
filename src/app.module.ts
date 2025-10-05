@@ -10,8 +10,7 @@ import { AppService } from './app.service';
 import { UploadPhotoModule } from './upload-photo/upload-photo.module';
 import { AuthModule } from './auth/auth.module';
 
-// const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/gallery'; // localhost
-const mongoUri = process.env.MONGO_URI
+const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/gallery'; // localhost
 @Module({
   imports: [
     UploadPhotoModule,
@@ -31,13 +30,17 @@ const mongoUri = process.env.MONGO_URI
     // }),
 
     ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public/family-client/favicon.ico'),
+      serveRoot: '/favicon.ico',
+    }),
+    ServeStaticModule.forRoot({
       rootPath: join('N:', 'Users', 'HP', 'files'), // Using join with path segments for usual server
       // rootPath: join('/usr/src/app', 'files'), // Using join with path segments for k8s
       serveRoot: '/static-api/family-back',
-      // renderPath: '/files',
-      // rootPath: join(__dirname, '..', 'files'),
-      // renderPath: `/files`,
       exclude: ['/api/(.*)'],
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public/family-client'),
     }),
     DevtoolsModule.register({
       http: process.env.NODE_ENV !== 'production',
