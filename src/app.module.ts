@@ -39,9 +39,9 @@ const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/gallery'; /
       serveRoot: '/static-api/family-back',
       exclude: ['/api/(.*)'],
     }),
-    ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'public/family-client'),
-    }),
+    // ServeStaticModule.forRoot({
+    //   rootPath: join(__dirname, '..', 'public/family-client'),
+    // }),
     DevtoolsModule.register({
       http: process.env.NODE_ENV !== 'production',
     }),
