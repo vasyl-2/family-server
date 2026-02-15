@@ -9,7 +9,7 @@ export type VideoDocument = HydratedDocument<Video>;
 export class Video {
 
   @Prop({ type: mongoose.Schema.Types.ObjectId, ref: 'Chapter' })
-  chapter: Chapter;
+  chapter: mongoose.Types.ObjectId;
 
   @Prop()
   title?: string;

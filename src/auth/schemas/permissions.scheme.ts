@@ -12,8 +12,10 @@ export class Permissions {
   @Prop()
   displayName?: string;
 
-  @Prop({ type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Role' }] })
-  roles?: mongoose.Schema.Types.ObjectId[];
+  @Prop({
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Role' }]
+  })
+  roles?: mongoose.Types.ObjectId[];
 }
 
 export const PermissionsSchema = SchemaFactory.createForClass(Permissions)

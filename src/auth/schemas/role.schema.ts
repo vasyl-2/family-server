@@ -12,7 +12,7 @@ export class Role {
   @Prop({
     type: [{ type: [mongoose.Schema.Types.ObjectId], ref: 'Permissions' }],
   })
-  permissions: mongoose.Schema.Types.ObjectId[];
+  permissions: mongoose.Types.ObjectId[];
 
   @Prop()
   displayName?: string;

@@ -1,10 +1,12 @@
 import { PermissionDto } from './dto/permission-dto';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types, ObjectId } from 'mongoose';
 
 import { PermissionsDocument } from './schemas/permissions.scheme';
 import { PermissionsServiceInterface } from './models/permissions.service.interface';
+import { FilterOperators } from 'mongodb';
+
 
 @Injectable()
 export class PermissionsService implements PermissionsServiceInterface {
