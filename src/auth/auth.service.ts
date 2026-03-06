@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, LoggerService, UnauthorizedException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
@@ -8,6 +8,7 @@ import { UserDocument } from './schemas/user.schem';
 import { UserDTO } from './dto/user-dto';
 import { PermissionsService } from './permissions.service';
 import { PermissionDto } from './dto/permission-dto';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 @Injectable()
 export class AuthService {
@@ -15,7 +16,8 @@ export class AuthService {
   constructor(
     @InjectModel('Auth') private readonly auth: Model<UserDocument>,
     private jwtService: JwtService,
-    private permissionService: PermissionsService
+    private permissionService: PermissionsService,
+    @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: LoggerService
   ) {
   }
 
@@ -25,7 +27,7 @@ export class AuthService {
     try {
       users = await this.auth.find().exec();
     } catch (e) {
-      console.error('ERR_GET_USERS__', JSON.stringify(e));
+      this.logger.error('ERR_GET_USERS__', JSON.stringify(e));
     }
 
     return users;
@@ -39,7 +41,7 @@ export class AuthService {
 
       return result;
     } catch (e) {
-      console.error('ERR_ADD__USER___', JSON.stringify(e));
+      this.logger.error('ERR_ADD__USER___', JSON.stringify(e));
     }
   }
 
@@ -50,7 +52,7 @@ export class AuthService {
     const resp = await this.auth.findOne({ email: creds.email }).exec();
     
     if (!resp) {
-      console.error('Incorrect user!', creds.email);
+      this.logger.error('Incorrect user!', creds.email);
     }
 
     const isPasswordCorrect = await bcrypt.compare(
@@ -70,7 +72,7 @@ export class AuthService {
       permissions =
         await this.permissionService.getPermissionsByRolesIds(roleIds);
     } catch (err) {
-      console.error('ROLES_ERROR_______', JSON.stringify(err));
+      this.logger.error('ROLES_ERROR_______', JSON.stringify(err));
     }
 
     const permissionIds = permissions.map((p) => p._id.toString());
@@ -87,7 +89,7 @@ export class AuthService {
     try {
       access_token = await this.jwtService.signAsync(payload);
     } catch (e) {
-      console.error('ERR_ACCESS_TOKEN__SIGNING__', JSON.stringify(e));
+      this.logger.error('ERR_ACCESS_TOKEN__SIGNING__', JSON.stringify(e));
     }
 
     return { access_token };

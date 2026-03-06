@@ -13,6 +13,14 @@ async function bootstrap() {
   });
   // const app = await NestFactory.create(AppModule);
   app.enableCors();
+  // app.enableCors(
+  //   {
+  //     origin: '*', // Or specify specific origins
+  //     credentials: true,
+  //     allowedHeaders: ['Content-Type', 'Authorization'],
+  //   }
+  // );
+
   app.setGlobalPrefix('/api/family-back')
   await app.listen(3000);
 }

@@ -1,16 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, LoggerService } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { UserDocument } from './schemas/user.schem';
 import { UserServiceInterface } from './models/user.service.interface';
 import { UserDTO } from './dto/user-dto';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 @Injectable()
 export class UserService implements UserServiceInterface {
 
   constructor(
-    @InjectModel('Auth') private readonly user: Model<UserDocument>
+    @InjectModel('Auth') private readonly user: Model<UserDocument>,
+    @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: LoggerService
   ) {
 
   }
@@ -22,7 +24,7 @@ export class UserService implements UserServiceInterface {
       const newUserToAdd = new this.user(user);
       newUser = await newUserToAdd.save();
     } catch (e) {
-
+      this.logger.error('createUser', e);
     }
     return newUser;
   }
@@ -52,7 +54,7 @@ export class UserService implements UserServiceInterface {
     try {
       resp = await this.user.findByIdAndUpdate(_id, updateBody,{ new: true });
     } catch(err) {
-      console.error('UPDATE_ERROR___', err);
+      this.logger.error('UPDATE_ERROR___', err);
     }
 
     return resp;
@@ -64,7 +66,7 @@ export class UserService implements UserServiceInterface {
     try {
       users = await this.user.find().exec();
     } catch (e) {
-      console.error('GET_USERS_ERROR____', JSON.stringify(e));
+      this.logger.error('GET_USERS_ERROR____', JSON.stringify(e));
     }
 
     return users;

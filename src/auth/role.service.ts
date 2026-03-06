@@ -1,16 +1,18 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, LoggerService } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { RoleServiceInterface } from './models/role.service.interface';
 import { Role, RoleDocument } from './schemas/role.schema';
 import { RoleDto } from './dto/role-dto';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 @Injectable()
 export class RoleService implements RoleServiceInterface {
 
   constructor(
-    @InjectModel(Role.name) private readonly role: Model<RoleDocument>
+    @InjectModel(Role.name) private readonly role: Model<RoleDocument>,
+    @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: LoggerService
   ) {
   }
 
@@ -20,16 +22,16 @@ export class RoleService implements RoleServiceInterface {
     try {
       createdRoleTOAdd = new this.role(role);
     } catch(e) {
-      console.error('CREATE_ERROR___1', JSON.stringify(e));
+      this.logger.error('CREATE_ERROR___1', JSON.stringify(e));
     }
 
     try {
       createdRole = await createdRoleTOAdd.save();
     } catch (e) {
-      console.error('CREATE___ROLE____2', JSON.stringify(e));
+      this.logger.error('CREATE___ROLE____2', JSON.stringify(e));
     }
 
-    console.log('RESULT_______', createdRole);
+    this.logger.log('RESULT_______', createdRole);
     return createdRole;
   }
 
@@ -47,7 +49,7 @@ export class RoleService implements RoleServiceInterface {
 
     try {
       roles = await this.role.find().exec();
-      console.log('ROLES____', roles);
+      this.logger.log('ROLES____', roles);
     } catch(e) {
 
     }
@@ -60,7 +62,7 @@ export class RoleService implements RoleServiceInterface {
 
     try {
       role = await this.role.findById(roleId).exec();
-      console.log('ROLES____', role);
+      this.logger.log('ROLES____', role);
     } catch(e) {
       console.error(`during get role by id: ${JSON.stringify(e)}`);
     }

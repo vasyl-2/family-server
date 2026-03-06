@@ -1,12 +1,14 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, UnauthorizedException } from '@nestjs/common';
+import { Inject, Body, Controller, Get, HttpCode, HttpStatus, Post, UnauthorizedException, LoggerService } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UserDTO } from './dto/user-dto';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 @Controller('auth')
 export class AuthController {
 
   constructor(
-    private authService: AuthService
+    private authService: AuthService,
+    @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: LoggerService
   ) {
   }
 
@@ -46,12 +48,12 @@ export class AuthController {
   ) {
     let user;
 
-    console.log('creds__________', creds);
+    this.logger.log('creds__________', creds);
 
     try {
       user = await this.authService.signIn({ email: creds.email, password: creds.password });
     } catch (e) {
-      console.error('incorrect password / user', e);
+      this.logger.error('incorrect password / user', e);
       throw e;
     }
 
