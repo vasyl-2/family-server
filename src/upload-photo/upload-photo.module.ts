@@ -10,6 +10,7 @@ import { PhotoValidatorService } from './photo-validator/photo-validator.service
 import { AuthModule } from '../auth/auth.module';
 import { Video, VideoSchema } from './video-schema';
 import { Doc, DocSchema } from './doc.schema';
+import { RestService } from '../rest/rest.service';
 
 const mongooseSchemas = [
   MongooseModule.forFeature([{ name: Gallery.name, schema: GallerySchema }]),
@@ -25,6 +26,6 @@ const mongooseSchemas = [
     AuthModule
   ],
   controllers: [UploadPhotoController],
-  providers: [UploadPhotoService, PhotoValidatorService]
+  providers: [UploadPhotoService, PhotoValidatorService, RestService]
 })
 export class UploadPhotoModule {}

@@ -10,7 +10,7 @@ import {
   ParseFilePipe,
   UseGuards,
   StreamableFile,
-  Header,
+  Header, Inject, LoggerService,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { join } from 'path';
@@ -23,10 +23,14 @@ import { createReadStream } from 'fs';
 import { Permissions } from '../auth/decorators/permissions.decorator';
 import { PermissionGuard } from '../auth/guards/permission.guard';
 import { diskStorageOptions } from '../disk-storage-options';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 @Controller('upload-photo')
 export class UploadPhotoController {
-  constructor(private readonly uploadPhotoService: UploadPhotoService) {}
+  constructor(
+    private readonly uploadPhotoService: UploadPhotoService,
+    @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: LoggerService
+  ) {}
 
   @Post('uploadfile')
   @UseInterceptors(FileInterceptor('photo', diskStorageOptions))
@@ -45,7 +49,7 @@ export class UploadPhotoController {
     try {
       await this.uploadPhotoService.uploadPhoto(body, filename);
     } catch (e) {
-      console.log('uploadfile', JSON.stringify(e));
+      this.logger.error('uploadFile', JSON.stringify(e));
       throw e;
     }
 
@@ -71,7 +75,7 @@ export class UploadPhotoController {
     try {
       await this.uploadPhotoService.uploadVideo(body, filename);
     } catch (e) {
-      console.log('uploadvideo', JSON.stringify(e));
+      this.logger.error('uploadVideo', JSON.stringify(e));
       throw e;
     }
 
@@ -164,14 +168,16 @@ export class UploadPhotoController {
   }
 
   @Patch('updatephoto/:id')
-  updatePhoto(@Param('id') id: string, @Body() body: { photo: any }) {
+  updatePhoto(@Param('id') id: string, @Body() body: { photo: CreateUploadPhotoDto }) {
     return this.uploadPhotoService.updatePhoto(body.photo);
   }
 
   @Patch('updatevideo/:id')
-  updateVideo(@Param('id') id: string, @Body() body: { video: any }) {
+  updateVideo(@Param('id') id: string, @Body() body: { video: CreateUploadPhotoDto }) {
     return this.uploadPhotoService.updateVideo(body.video);
   }
+
+  // @TODO merge into one route photo and video
 
   @Patch('updatepdf/:id')
   updatePdf(@Param('id') id: string, @Body() body: { doc: any }) {

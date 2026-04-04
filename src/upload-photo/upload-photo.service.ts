@@ -1,4 +1,4 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, LoggerService, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as fsProm from 'fs/promises';
@@ -14,6 +14,9 @@ import { Chapter, ChapterDocument } from './chapter-schema';
 import { VideoDocument } from './video-schema';
 import { Video } from './video-schema';
 import { DocDocument } from './doc.schema';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
+import { RestService } from '../rest/rest.service';
+import { join } from 'path';
 
 
 @Injectable()
@@ -43,6 +46,8 @@ export class UploadPhotoService implements OnModuleInit {
     @InjectModel('Chapter') private readonly chapter: Model<ChapterDocument>,
     @InjectModel('Video') private readonly video: Model<VideoDocument>,
     @InjectModel('Doc') private readonly pdf: Model<DocDocument>,
+    @Inject(WINSTON_MODULE_NEST_PROVIDER) private readonly logger: LoggerService,
+    private restService: RestService,
   ) {}
 
   async onModuleInit(): Promise<void> {
@@ -280,27 +285,53 @@ export class UploadPhotoService implements OnModuleInit {
   }
 
   async updateVideo(updatedDto: CreateUploadPhotoDto) {
-    const video = await this.video.findById(updatedDto._id);
 
-    if (!video) {
-      console.log('NO___VIDEO_____________');
-      throw new Error('Video not found_________');
+    updatedDto.dateOfUpdate = new Date();
+
+    const media = await this.video.findById(updatedDto._id);
+
+    let  fullPath: Partial<CreateUploadPhotoDto>;
+
+    try {
+      fullPath = await this.video.findById(updatedDto._id, { fullPath: true, name: true });
+    } catch(err) {
+      this.logger.error('get full path', JSON.stringify(err));
     }
 
-    const isEqual = updatedDto.name === video.name;
+    const pathToMedia = join(process.env.FILE_PATH, fullPath.fullPath, fullPath.name);
+
+    if (!media) {
+      console.log('NO___media___');
+      throw new Error('Media not found_________');
+    }
+
+    const isEqual = updatedDto.name === media.name;
 
     try {
       if (!isEqual) {
         // await fsProm.rename(`N:/Users/HP/files/${video.fullPath}/${video.name}`, `N:/Users/HP/files/${updatedDto.fullPath}/${updatedDto.name}`);
         await fsProm.rename(
-          `${process.env.FILE_PATH_ROW}/${video.fullPath}/${video.name}`,
+          `${process.env.FILE_PATH_ROW}/${media.fullPath}/${media.name}`,
           `${process.env.FILE_PATH_ROW}/${updatedDto.fullPath}/${updatedDto.name}`,
         );
       }
-      await this.video.updateOne({ _id: updatedDto._id }, updatedDto).exec();
+
+      await this.video.updateOne({ _id: updatedDto._id }, { $set: updatedDto }).exec();
 
     } catch (e) {
       console.log('ERROR_UPDATE_', JSON.stringify(e));
+    }
+
+    try {
+      await this.restService.setVideoDate(updatedDto.date, pathToMedia);
+    } catch (e) {
+      this.logger.error('ERROR_UPDATE_DATE__', JSON.stringify(e));
+    }
+
+    try {
+      await this.restService.setDate(updatedDto.date, pathToMedia);
+    } catch (e) {
+      this.logger.error('ERROR_UPDATE_DATE__', JSON.stringify(e));
     }
 
     return updatedDto;
@@ -308,25 +339,45 @@ export class UploadPhotoService implements OnModuleInit {
 
   async updatePhoto(updatedDto: CreateUploadPhotoDto) {
 
-    const photo = await this.gallery.findById(updatedDto._id);
-    if (!photo) {
-      console.log('NO___PHOTO_____________');
-      throw new Error('Photo not found_________');
+    updatedDto.dateOfUpdate = new Date();
+
+    let  fullPath: Partial<CreateUploadPhotoDto>;
+
+    try {
+      fullPath = await this.gallery.findById(updatedDto._id, { fullPath: true, name: true });
+    } catch(err) {
+      this.logger.error('get full path', JSON.stringify(err));
     }
 
-    const isEqual = updatedDto.name === photo.name;
+    const pathToMedia = join(process.env.FILE_PATH, fullPath.fullPath, fullPath.name);
+
+    const media = await this.gallery.findById(updatedDto._id);
+
+    if (!media) {
+      console.log('NO___media___');
+      throw new Error('Media not found_________');
+    }
+
+    const isEqual = updatedDto.name === media.name;
 
     try {
       if (!isEqual) {
         // await fsProm.rename(`N:/Users/HP/files/${photo.fullPath}/${photo.name}`, `N:/Users/HP/files/${updatedDto.fullPath}/${updatedDto.name}`);
         await fsProm.rename(
-          `${process.env.FILE_PATH_ROW}/${photo.fullPath}/${photo.name}`,
+          `${process.env.FILE_PATH_ROW}/${media.fullPath}/${media.name}`,
           `${process.env.FILE_PATH_ROW}/${updatedDto.fullPath}/${updatedDto.name}`,
         );
       }
-      await this.gallery.updateOne({ _id: updatedDto._id }, updatedDto).exec();
+
+      await this.gallery.updateOne({ _id: updatedDto._id }, { $set: updatedDto }).exec();
     } catch (e) {
       console.log('ERROR_UPDATE_', JSON.stringify(e));
+    }
+
+    try {
+      await this.restService.setDate(updatedDto.date, pathToMedia);
+    } catch (e) {
+      this.logger.error('ERROR_UPDATE_DATE__', JSON.stringify(e));
     }
 
     return updatedDto;

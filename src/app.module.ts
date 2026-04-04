@@ -10,13 +10,16 @@ import { AppService } from './app.service';
 import { UploadPhotoModule } from './upload-photo/upload-photo.module';
 import { AuthModule } from './auth/auth.module';
 import { WinstonModule } from 'nest-winston';
+import { RestModule } from './rest/rest.module';
 import * as winston from 'winston';
 import 'winston-daily-rotate-file';
+import { FamilyGatewayService } from './services/family-gateway/family-gateway.service';
 
 const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/gallery'; // localhost
 @Module({
   imports: [
     UploadPhotoModule,
+    RestModule,
     ConfigModule.forRoot({
       envFilePath: '.env',
     }),
@@ -63,10 +66,11 @@ const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/gallery'; /
           maxFiles: '14d'
         })
       ],
-    })
+    }),
+    RestModule
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, FamilyGatewayService],
 })
 export class AppModule {}
 

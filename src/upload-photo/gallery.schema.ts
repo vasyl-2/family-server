@@ -26,6 +26,9 @@ export class Gallery {
   date?: Date;
 
   @Prop()
+  dateOfUpdate?: Date;
+
+  @Prop()
   name: string;
 
   @Prop()
